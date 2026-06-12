@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Geschiedenis VWO Flashcards 2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f4f0;
+    color: #1a1a1a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: #2c3e50;
+    color: white;
+    padding: 14px 16px 10px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  header h1 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .stat {
+    background: rgba(255,255,255,0.12);
+    border-radius: 6px;
+    padding: 5px 4px;
+    text-align: center;
+  }
+  .stat-val { font-size: 18px; font-weight: 700; line-height: 1.1; }
+  .stat-lbl { font-size: 9px; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.3px; }
+  .stat.good .stat-val { color: #4cd964; }
+  .stat.wrong .stat-val { color: #ff6b6b; }
+  .stat.ratio .stat-val { color: #ffd60a; }
+
+  .progress-bar-wrap {
+    margin-top: 8px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 4px;
+    height: 4px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: #4cd964;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  main {
+    flex: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .tijdvak-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #e8e6df;
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: inline-block;
+  }
+
+  .card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 20px;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .card:active { transform: scale(0.98); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+  .card.flip { background: #f0faf5; }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .card.flip .card-label { color: #2a9d5c; }
+
+  .card-text {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.5;
+    flex: 1;
+  }
+  .card-hint {
+    font-size: 12px;
+    color: #aaa;
+    text-align: center;
+    margin-top: auto;
+  }
+
+  .btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .btn-row.single { grid-template-columns: 1fr; }
+
+  button {
+    border: none;
+    border-radius: 12px;
+    padding: 14px 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:active { transform: scale(0.97); opacity: 0.85; }
+  .btn-flip { background: #2c3e50; color: white; }
+  .btn-good { background: #4cd964; color: #1a4a25; }
+  .btn-wrong { background: #ff6b6b; color: #5a0000; }
+  .btn-skip { background: #e8e6df; color: #555; font-size: 13px; }
+
+  .rolling-bar {
+    background: white;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .rolling-dots {
+    display: flex;
+    gap: 3px;
+    flex: 1;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #e0ddd5;
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+  .dot.g { background: #4cd964; }
+  .dot.w { background: #ff6b6b; }
+  .dot.empty { background: #e0ddd5; }
+
+  .finished {
+    text-align: center;
+    padding: 24px 16px;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .finished h2 { font-size: 22px; margin-bottom: 8px; }
+  .finished p { color: #666; margin-bottom: 16px; font-size: 15px; }
+  .btn-restart { background: #2c3e50; color: white; width: 100%; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 600; border: none; cursor: pointer; }
+
+  .hidden { display: none !important; }
+
+  #question-counter {
+    font-size: 12px;
+    color: #999;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📚 Geschiedenis VWO — Flashcards 2026</h1>
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-val" id="s-total">0</div>
+      <div class="stat-lbl">Aangeboden</div>
+    </div>
+    <div class="stat good">
+      <div class="stat-val" id="s-good">0</div>
+      <div class="stat-lbl">Goed</div>
+    </div>
+    <div class="stat wrong">
+      <div class="stat-val" id="s-wrong">0</div>
+      <div class="stat-lbl">Fout</div>
+    </div>
+    <div class="stat ratio">
+      <div class="stat-val" id="s-ratio">—</div>
+      <div class="stat-lbl">Laatste 20</div>
+    </div>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</header>
+
+<main>
+  <div id="game-area">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <span class="tijdvak-badge" id="tijdvak-badge">Tijdvak 1</span>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span id="question-counter"></span>
+        <button onclick="confirmReset()" style="background:#e8e6df; color:#555; border:none; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:600; cursor:pointer;">↺ Reset</button>
+      </div>
+    </div>
+
+    <div class="card" id="card" onclick="flipCard()">
+      <div class="card-label" id="card-label">Vraag</div>
+      <div class="card-text" id="card-text">Laden…</div>
+      <div class="card-hint" id="card-hint">Tik om antwoord te zien</div>
+    </div>
+
+    <div class="btn-row single" id="btn-flip-row">
+      <button class="btn-flip" onclick="flipCard()">Toon antwoord</button>
+    </div>
+
+    <div class="btn-row hidden" id="btn-answer-row">
+      <button class="btn-wrong" onclick="answer(false)">✗ Fout</button>
+      <button class="btn-good" onclick="answer(true)">✓ Goed</button>
+    </div>
+
+    <div class="rolling-bar">
+      <span style="font-size:11px; white-space:nowrap; color:#999;">Laatste 20:</span>
+      <div class="rolling-dots" id="rolling-dots"></div>
+      <span style="font-size:12px; font-weight:600;" id="rolling-pct">—</span>
+    </div>
+  </div>
+
+  <div id="finished-area" class="finished hidden">
+    <div style="font-size:48px; margin-bottom:12px;">🎉</div>
+    <h2>Klaar!</h2>
+    <p>Je hebt alle vragen beantwoord.</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+      <div style="background:#f0faf5; border-radius:10px; padding:12px; text-align:center;">
+        <div style="font-size:24px; font-weight:700; color:#2a9d5c;" id="f-good">—</div>
+        <div style="font-size:11px; color:#666;">In één keer goed</div>
+      </div>
+      <div style="background:#fff5f5; border-radius:10px; padding:12px; text-align:center;">
+        <div style="font-size:24px; font-weight:700; color:#c0392b;" id="f-wrong">—</div>
+        <div style="font-size:11px; color:#666;">Fout (of overgeslagen)</div>
+      </div>
+    </div>
+    <button class="btn-restart" onclick="restart()">Opnieuw oefenen</button>
+  </div>
+</main>
+
+<script>
+const ALL_CARDS = [
+  // === TIJDVAK 1: Jagers en boeren ===
+  {t:"Tijdvak 1 — Jagers & Boeren", q:"Wat wordt verstaan onder de 'neolithische revolutie'?", a:"De overgang van een nomadische, jagende en verzamelende levensstijl naar een sedentaire, agrarische samenleving (ca. 10.000 v.Chr.)."},
+  {t:"Tijdvak 1 — Jagers & Boeren", q:"Wat zijn kenmerkende aspecten van de prehistorie als het gaat om religie en rituelen?", a:"Animistisch geloof, aanbidding van natuurkrachten, grafgiften en megalithische bouwwerken (zoals dolmens en hunebedden)."},
+  {t:"Tijdvak 1 — Jagers & Boeren", q:"Welke gevolgen had de introductie van landbouw voor de sociale ongelijkheid?", a:"Landbouwoverschotten leidden tot specialisatie, handel en eigendom, waardoor sociale lagen ontstonden en ongelijkheid toenam."},
+  {t:"Tijdvak 1 — Jagers & Boeren", q:"Wat is het kenmerkende aspect van de verspreiding van landbouw in Europa?", a:"De landbouw verspreidde zich vanuit het Nabije Oosten (Vruchtbare Halvemaan) richting Europa via migratie en culturele overdracht."},
+
+  // === TIJDVAK 2: Grieken en Romeinen ===
+  {t:"Tijdvak 2 — Grieken & Romeinen", q:"Wat zijn de kenmerken van de Griekse democratie in Athene?", a:"Directe democratie voor mannelijke burgers, volksassemblee (ekklesia), loting voor ambtelijke functies, uitsluiting van vrouwen en slaven."},
+  {t:"Tijdvak 2 — Grieken & Romeinen", q:"Wat is de Polis?", a:"De Griekse stadstaat, bestaand uit een stad en het omringende platteland, met eigen bestuur, wetten en burgeridentiteit."},
+  {t:"Tijdvak 2 — Grieken & Romeinen", q:"Welke staatsvorm had de Romeinse Republiek (509–27 v.Chr.)?", a:"Een aristocratische republiek met twee consuls, een Senaat en volksvertegenwoordigingen (comitia). De macht lag bij de patricische elite."},
+  {t:"Tijdvak 2 — Grieken & Romeinen", q:"Wat was het belang van het Romeinse recht voor de Europese beschaving?", a:"Het Romeinse recht (o.a. de Twaalf Tafelen) vormt de basis van het huidige continentaal-Europese rechtsstelsel: rechtszekerheid, eigendomsrecht en burgerrechten."},
+  {t:"Tijdvak 2 — Grieken & Romeinen", q:"Wat zijn de oorzaken van de val van het West-Romeinse Rijk (476 n.Chr.)?", a:"Militaire druk van Germaanse volksstammen, economische crisis, politieke instabiliteit, overstrekte grenzen en ontvlechting van het rijk."},
+  {t:"Tijdvak 2 — Grieken & Romeinen", q:"Wat is het Hellenisme?", a:"De periode na Alexander de Grote (323–31 v.Chr.) waarin Griekse cultuur en taal zich mengden met oosterse tradities in een groot deel van de bekende wereld."},
+  {t:"Tijdvak 2 — Grieken & Romeinen", q:"Wat is het verschil tussen patriciërs en plebejers in Rome?", a:"Patriciërs waren de oorspronkelijke adellijke families met politieke privileges; plebejers waren de gewone burgers die geleidelijk via de Standstrijd meer rechten verkregen."},
+
+  // === TIJDVAK 3: Monniken en ridders ===
+  {t:"Tijdvak 3 — Monniken & Ridders", q:"Wat is feodalisme?", a:"Een middeleeuws politiek-economisch systeem waarbij heren aan vazallen land (leen) gaven in ruil voor militaire dienst en trouw."},
+  {t:"Tijdvak 3 — Monniken & Ridders", q:"Welke rol speelde de Katholieke Kerk in de vroegmiddeleeuwse samenleving?", a:"De Kerk was de dominante culturele, politieke en economische macht: beheerde onderwijs, ziekenhuizen, bood legitimatie aan koningen en hief tienden."},
+  {t:"Tijdvak 3 — Monniken & Ridders", q:"Wat was de Investituurstrijd?", a:"Het conflict (11e–12e eeuw) tussen pausen en keizers over de vraag wie het recht had bisschoppen en abten te benoemen (te investeren)."},
+  {t:"Tijdvak 3 — Monniken & Ridders", q:"Wat waren de Kruistochten en wat was hun doel?", a:"Militaire expedities (1096–1291) door Europese christenen om Jeruzalem en het Heilige Land te veroveren op moslimheersers, goedgekeurd door de paus."},
+  {t:"Tijdvak 3 — Monniken & Ridders", q:"Wat is de betekenis van het Concordaat van Worms (1122)?", a:"Het compromis tussen paus Calixtus II en keizer Hendrik V: de kerk benoemt geestelijken, de keizer belent hen met wereldlijke macht — scheiding kerk en staat."},
+  {t:"Tijdvak 3 — Monniken & Ridders", q:"Wat is de Reconquista?", a:"De eeuwenlange herovering van het Iberisch Schiereiland door christelijke koninkrijken op de moslimse heersers (711–1492)."},
+
+  // === TIJDVAK 4: Steden en staten ===
+  {t:"Tijdvak 4 — Steden & Staten", q:"Wat zijn de oorzaken van de opkomst van steden in de middeleeuwen (11e–13e eeuw)?", a:"Landbouwoverschotten, bevolkingsgroei, opkomst van handel en ambacht, en de vestiging van markten en jaarmarkten."},
+  {t:"Tijdvak 4 — Steden & Staten", q:"Wat is een Hanzeatische stad?", a:"Een lid van de Hanze, een handelsverbond van Noord-Europese steden (13e–17e eeuw) dat de handel in de Noordzee- en Oostzeeregio domineerde."},
+  {t:"Tijdvak 4 — Steden & Staten", q:"Wat was de Zwarte Dood en welke gevolgen had het?", a:"De pestepidemie (1347–1353) doodde ca. 30–50% van de Europese bevolking, leidde tot arbeidstekort, sociale onrust en religieuze twijfel."},
+  {t:"Tijdvak 4 — Steden & Staten", q:"Wat zijn de kenmerken van een centraliserend vorstendom?", a:"Een staatsvorm waarbij de vorst gezag centraliseert via een professioneel leger, belastingstelsel, bureaucratie en wetten — ten koste van de adel en steden."},
+  {t:"Tijdvak 4 — Steden & Staten", q:"Wat is de betekenis van de Magna Carta (1215)?", a:"Het Engelse document dat de macht van de koning beperkte en rechten van edelen vastlegde; beschouwd als vroeg voorbeeld van constitutioneel bestuur."},
+  {t:"Tijdvak 4 — Steden & Staten", q:"Wat waren gilden en welke rol speelden zij in de middeleeuwse economie?", a:"Beroepsverenigingen van ambachtslieden en kooplieden die kwaliteit, prijzen en toegang tot het beroep reguleerden."},
+
+  // === TIJDVAK 5: Ontdekkers en hervormers ===
+  {t:"Tijdvak 5 — Ontdekkers & Hervormers", q:"Wat zijn de kenmerken van het humanisme?", a:"Een Renaissance-denktrant (14e–16e eeuw) die de mens centraal stelt, de klassieke Oudheid herleefde en kritisch redeneren bevorderde."},
+  {t:"Tijdvak 5 — Ontdekkers & Hervormers", q:"Wat waren de 95 stellingen van Luther (1517)?", a:"Luthers aanklacht tegen misstanden in de Kerk, met name de aflatenhandel; het startschot van de Reformatie."},
+  {t:"Tijdvak 5 — Ontdekkers & Hervormers", q:"Wat is het verschil tussen lutheranisme en calvinisme?", a:"Lutheranisme: rechtvaardiging door geloof alleen; calvinisme: predestinatieleer (uitverkiezing), soberheid en nadruk op de soevereiniteit van God."},
+  {t:"Tijdvak 5 — Ontdekkers & Hervormers", q:"Wat zijn de gevolgen van de Europese expansie voor Amerika?", a:"Vernietiging van inheemse beschavingen door geweld en ziektes, invoering van slavernij, extractie van grondstoffen en culturele overheersing."},
+  {t:"Tijdvak 5 — Ontdekkers & Hervormers", q:"Wat was het Concilie van Trente (1545–1563)?", a:"De katholieke reactie op de Reformatie: herbevestiging van dogma's, kerkhervorming van binnenuit en versterking van pauselijk gezag."},
+  {t:"Tijdvak 5 — Ontdekkers & Hervormers", q:"Wat was de Columbus-uitwisseling?", a:"De uitwisseling van gewassen, dieren, mensen en ziektekiemen tussen de Oude en Nieuwe Wereld na 1492, met ingrijpende demografische gevolgen."},
+  {t:"Tijdvak 5 — Ontdekkers & Hervormers", q:"Wat is mercantilisme?", a:"Een economisch beleid waarbij staten streven naar maximale export, minimale import en accumulatie van edele metalen om nationale rijkdom te vergroten."},
+
+  // === TIJDVAK 6: Regenten en vorsten ===
+  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat zijn de kenmerken van het absolutisme?", a:"Een staatsvorm waarbij de vorst alle macht concentreert: geen parlement, geen onafhankelijke rechtspraak, beroep op goddelijk recht ('l'état c'est moi')."},
+  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat was de Nederlandse Opstand (1568–1648) en waardoor ontstond hij?", a:"Opstand van de Nederlanden tegen Spaans gezag door belastingdruk, inquisitie, centralisatiebeleid van Filips II en calvinistische religie."},
+  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat was de Vrede van Westfalen (1648) en waarom is hij historisch belangrijk?", a:"Het einde van de Dertigjarige Oorlog; erkende de soevereiniteit van staten en het principe van non-interventie — grondslag van het moderne statenstelsel."},
+  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat waren de kenmerken van de Republiek der Zeven Verenigde Nederlanden?", a:"Een federale republiek met regentenaristocratie, religieuze tolerantie, dominante handelselite en geen erfelijk koningschap."},
+  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat was de VOC en wat maakte haar bijzonder?", a:"De Verenigde Oost-Indische Compagnie (1602): 's werelds eerste naamloze vennootschap met aandelenkapitaal, monopolie op Aziatische handel en quasi-staatsmacht."},
+  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat is het verschil tussen een stadhouder en een pensionaris in de Republiek?", a:"De stadhouder (bijv. Willem van Oranje) was de militaire en politieke leider; de raadpensionaris (bijv. Johan de Witt) leidde de Staten van Holland."},
+  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat zijn de kenmerken van de Verlichting (17e–18e eeuw)?", a:"Geloof in de rede, vooruitgang, wetenschappelijk denken, kritiek op kerk en absolutisme; vertegenwoordigers: Locke, Voltaire, Rousseau, Montesquieu."},
+
+  // === TIJDVAK 7: Pruiken en revoluties ===
+  {t:"Tijdvak 7 — Pruiken & Revoluties", q:"Wat waren de oorzaken van de Franse Revolutie (1789)?", a:"Financiële crisis van de staat, hongersnood, sociale ongelijkheid (standenmaatschappij), Verlichtingsideeën en zwak leiderschap van Lodewijk XVI."},
+  {t:"Tijdvak 7 — Pruiken & Revoluties", q:"Wat staat er in de Déclaration des droits de l'homme et du citoyen (1789)?", a:"Gelijkheid voor de wet, vrijheid van meningsuiting, volkssoevereiniteit, eigendomsrecht en het recht op weerstand tegen tirannie."},
+  {t:"Tijdvak 7 — Pruiken & Revoluties", q:"Wat is de Terreur (1793–1794)?", a:"De periode onder Robespierre en het Comité de salut public waarin duizenden 'vijanden van de revolutie' werden geguillotineerd."},
+  {t:"Tijdvak 7 — Pruiken & Revoluties", q:"Wat waren de gevolgen van de Napoleontische oorlogen voor Europa?", a:"Verspreiding van Verlichtingsidealen en de Napoleontische Code, nationale bewustwording, herordening van grenzen op het Congres van Wenen (1815)."},
+  {t:"Tijdvak 7 — Pruiken & Revoluties", q:"Wat regelde het Congres van Wenen (1814–1815)?", a:"De restauratie van de Europese grenzen na Napoleon, herstel van de monarchieën en het vestigen van een machtsevenwicht om toekomstige oorlogen te voorkomen."},
+  {t:"Tijdvak 7 — Pruiken & Revoluties", q:"Wat is het verschil tussen liberalisme en nationalisme in de 19e eeuw?", a:"Liberalisme streeft naar individuele vrijheid, grondwet en beperking van staatsmacht; nationalisme streeft naar de vorming van een staat op basis van gedeelde taal, cultuur en identiteit."},
+  {t:"Tijdvak 7 — Pruiken & Revoluties", q:"Wat was de Bataafse Republiek?", a:"De Nederlandse republiek (1795–1806) die na de Patriottenrevolutie en de Franse inval werd gevestigd, met een meer democratische grondwet."},
+
+  // === TIJDVAK 8: Burgers en stoommachines ===
+  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat zijn de voorwaarden voor de Industriële Revolutie in Engeland?", a:"Beschikbaarheid van steenkool en ijzer, koloniale grondstoffen, vrijhandel, kapitalisme, technologische innovaties (stoommachine), en een flexibele arbeidersklasse."},
+  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat is het verschil tussen de eerste en tweede industriële revolutie?", a:"1e (ca. 1760–1840): stoom, textiel, staal. 2e (ca. 1870–1914): elektriciteit, chemie, verbrandingsmotor, massaproductie (Fordisme)."},
+  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat zijn de sociale gevolgen van de industrialisatie?", a:"Verstedelijking, groei van het proletariaat, slechte arbeidsomstandigheden, kinderarbeid, vakbondsvorming en opkomst van het socialisme."},
+  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat zijn de kernideeën van het marxisme?", a:"Klassenstrijd tussen bourgeoisie en proletariaat, meerwaarde-theorie, historisch materialisme en het streven naar een klasseloze samenleving via revolutie."},
+  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat is imperialisme in de context van de 19e eeuw?", a:"De politiek van Europese mogendheden om Aziatische en Afrikaanse gebieden te veroveren, exploiteren en besturen als koloniën."},
+  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat was de Conferentie van Berlijn (1884–1885)?", a:"Europese mogendheden verdeelden Afrika onderling ('Scramble for Africa') zonder rekening te houden met inheemse volkeren of grenzen."},
+  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat waren de kenmerken van de verzuiling in Nederland?", a:"De organisatie van de samenleving langs religieuze en ideologische zuilen (protestants, katholiek, socialistisch, liberaal) met eigen scholen, media en politieke partijen."},
+  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat zijn de vier hoofdoorzaken van de Eerste Wereldoorlog (MAIN)?", a:"Militarisme, Alliantiestelsel (Triple Entente vs. Triple Alliantie), Imperialisme en Nationalisme; aanleiding: moord op Franz Ferdinand (1914)."},
+
+  // === TIJDVAK 9: Wereldoorlogen ===
+  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat zijn de kenmerken van het totalitarisme?", a:"Eénpartijstaat, staatscultus, censuur, terreur, propaganda, liquidatie van oppositie en totale controle over economie en privéleven."},
+  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat zijn de overeenkomsten en verschillen tussen fascisme en nationaalsocialisme?", a:"Beide: autoritair, nationalisme, anti-marxisme, geweld. Verschil: nazisme is rassenideologie (antisemitisme, Arisch ras); Italiaans fascisme benadrukt meer de staat."},
+  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat waren de bepalingen en gevolgen van het Verdrag van Versailles (1919)?", a:"Duitsland krijgt oorlogsschuld, verliest grondgebied, betaalt herstelbetalingen — deze vernederende voorwaarden stimuleerden het opkomend nationaalsocialisme."},
+  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat is de Holocaust?", a:"De systematische genocide door de nazi's op zes miljoen Joden en miljoenen anderen (Roma, gehandicapten, homo's, politieke tegenstanders) 1933–1945."},
+  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat was het Molotov–Ribbentroppact (1939)?", a:"Een niet-aanvalsverdrag tussen nazi-Duitsland en de Sovjet-Unie met een geheim protocol over de verdeling van Oost-Europa; maakte de aanval op Polen mogelijk."},
+  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat was de rol van Nederland in de Tweede Wereldoorlog?", a:"Bezetting door Duitsland (mei 1940), deportatie van Joodse Nederlanders, verzet en collaboratie, bevrijding 1944–1945."},
+  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat was de rol van de Volkenbond na de Eerste Wereldoorlog?", a:"Een internationale organisatie voor collectieve veiligheid (1920–1946); faalde door afwezigheid van de VS, geen eigen leger en gebrek aan handhavingsvermogen."},
+  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat zijn de oorzaken van de Grote Depressie (1929)?", a:"Overproductie, beurscrash op Wall Street, bancaire crises, protectionisme en een domino-effect via de internationale handelsketens."},
+  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat was de New Deal?", a:"Het economisch herstelbeleid van Roosevelt (1933–1939): staatsinterventie, sociale zekerheid, werkverschaffingsprogramma's — afwijzing van laissez-faire."},
+
+  // === TIJDVAK 10: Televisie en computer ===
+  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat is de Koude Oorlog en wie waren de hoofdrolspelers?", a:"Een ideologisch en geopolitiek conflict (1947–1991) tussen de VS (kapitalisme/democratie) en de Sovjet-Unie (communisme), nooit uitmonsterend in directe oorlog."},
+  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat is de Trumandoctrine?", a:"Het Amerikaanse beleid (1947) om communistische expansie in te dammen door militaire en economische steun aan landen die door communisme werden bedreigd."},
+  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat was de Cubacrisis (1962)?", a:"Twaalf-daagse confrontatie tussen de VS en USSR over Sovjet-raketten op Cuba; het dieptepunt van de Koude Oorlog, eindigend in een compromis."},
+  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat was de Marshallhulp?", a:"Amerikaans hulpprogramma (1948–1952) dat West-Europa economisch herstelde na WWII, ook bedoeld om communistische invloed in te dammen."},
+  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat zijn de oorzaken van de dekolonisatie na 1945?", a:"Nationalisme in koloniën, verzwakking van Europese mogendheden door WWII, druk van VS en VN, en het principe van zelfbeschikking."},
+  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat was de onafhankelijkheidsstrijd van Indonesië?", a:"Na de Japanse bezetting riep Soekarno in 1945 de onafhankelijkheid uit; na twee 'politionele acties' erkende Nederland in 1949 de soevereiniteit."},
+  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat zijn de fundamenten van de Europese integratie?", a:"Economische samenwerking (EGKS 1951, EEG 1957) als middel voor vrede, geïnspireerd door Schuman en Adenauer; groeide uit tot de EU."},
+  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat is apartheid?", a:"Het Zuid-Afrikaanse systeem van rassenscheiding (1948–1994) waarbij de zwarte bevolking politiek, economisch en sociaal werd onderdrukt."},
+  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat was de val van de Berlijnse Muur (1989) en wat volgde?", a:"Op 9 november 1989 opende de DDR de grens; het leidde tot de hereniging van Duitsland (1990) en het uiteenvallen van de Sovjet-Unie (1991)."},
+  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat zijn de kenmerken van de welvaartstaat (verzorgingsstaat)?", a:"Staatszorg voor alle burgers via sociale zekerheid, gezondheidszorg, onderwijs en pensioenen; gebaseerd op het Beveridge-rapport (1942)."},
+
+  // === EXTRA BEGRIPPEN en CONCEPTEN ===
+  {t:"Historisch Denken", q:"Wat is het verschil tussen oorzaak en aanleiding in historische analyse?", a:"Een oorzaak is een structurele factor die een gebeurtenis mogelijk maakt; een aanleiding is de directe, concrete trigger die het proces op gang brengt."},
+  {t:"Historisch Denken", q:"Wat wordt bedoeld met 'historisch besef'?", a:"Het vermogen om het verleden te begrijpen vanuit de eigen tijd en context, en daarmee het heden en de toekomst in perspectief te plaatsen."},
+  {t:"Historisch Denken", q:"Wat is de betekenis van continuïteit en verandering in de geschiedschrijving?", a:"Continuïteit: wat blijft hetzelfde door de tijd heen. Verandering: wat anders wordt. Historici analyseren het samenspel van beide."},
+  {t:"Historisch Denken", q:"Wat zijn primaire en secundaire bronnen?", a:"Primaire bron: een document uit de bestudeerde periode (dagboek, wet, foto). Secundaire bron: een latere interpretatie of analyse van primaire bronnen."},
+  {t:"Historisch Denken", q:"Wat is anachronisme in historiografie?", a:"Het toepassen van hedendaagse normen, begrippen of waarden op een historische situatie waarvoor ze niet gelden."},
+  {t:"Historisch Denken", q:"Wat zijn de tien tijdvakken van de Nederlandse Canon?", a:"1: Jagers en boeren, 2: Grieken en Romeinen, 3: Monniken en ridders, 4: Steden en staten, 5: Ontdekkers en hervormers, 6: Regenten en vorsten, 7: Pruiken en revoluties, 8: Burgers en stoommachines, 9: Wereldoorlogen, 10: Televisie en computer."},
+  {t:"Historisch Denken", q:"Wat is historiografie?", a:"De studie van de manier waarop geschiedenis is geschreven en hoe historische interpretaties door de tijd heen veranderen."},
+
+  // === NEDERLAND SPECIFIEK ===
+  {t:"Nederland Specifiek", q:"Wat was de Unie van Utrecht (1579)?", a:"Een defensief verbond van zeven noordelijke gewesten dat de basis legde voor de Republiek der Zeven Verenigde Nederlanden."},
+  {t:"Nederland Specifiek", q:"Wat was de Acte van Verlatinghe (1581)?", a:"De officiële verklaring van de Staten-Generaal die Filips II afzette als soeverein; beschouwd als de eerste onafhankelijkheidsverklaring in Europa."},
+  {t:"Nederland Specifiek", q:"Wat was de Gouden Eeuw van Nederland?", a:"De 17e eeuw, gekenmerkt door economische bloei via de VOC en WIC, culturele hoogbloei (Rembrandt, Vermeer), en internationale politieke invloed."},
+  {t:"Nederland Specifiek", q:"Wat was de WIC en wat was haar rol in de slavenhandel?", a:"De West-Indische Compagnie (1621): handelde in suiker, huiden en had een centrale rol in de trans-Atlantische slavenhandel vanuit West-Afrika naar Amerika."},
+  {t:"Nederland Specifiek", q:"Wanneer en hoe werd het Koninkrijk der Nederlanden opgericht?", a:"In 1813, na de ineenstorting van Napoleons rijk; Willem I werd soeverein vorst, in 1815 verhoogd tot koning."},
+  {t:"Nederland Specifiek", q:"Wat was de Schoolstrijd in Nederland?", a:"Het 19e-eeuwse politieke conflict over financiering van bijzonder (religieus) onderwijs, opgelost met de Pacificatie van 1917 (gelijkstelling openbaar en bijzonder onderwijs)."},
+  {t:"Nederland Specifiek", q:"Wat was Operatie Market Garden (1944)?", a:"Een geallieerde operatie waarbij luchtlandingstroepen belangrijke bruggen in Nederland innamen; eindigde in een mislukking bij Arnhem."},
+
+  // === INTERNATIONALE BETREKKINGEN ===
+  {t:"Internationale Betrekkingen", q:"Wat is de VN en wanneer werd ze opgericht?", a:"De Verenigde Naties, opgericht in 1945 na WWII om internationale vrede en veiligheid te bewaren via collectieve veiligheid en diplomatie."},
+  {t:"Internationale Betrekkingen", q:"Wat is de NAVO?", a:"Het Noord-Atlantisch Verdragsorganisatie (1949): een militair bondgenootschap van westerse democratieën, opgericht als tegenwicht tegen de Sovjet-dreiging."},
+  {t:"Internationale Betrekkingen", q:"Wat is detente?", a:"De ontspanning in de Koude Oorlog (jaren 1970) waarbij VS en USSR dialoog aangingen, wapenbeheersing nastreefden en handelsrelaties verbeterden."},
+  {t:"Internationale Betrekkingen", q:"Wat was het IJzeren Gordijn?", a:"De metaforische en fysieke grens die West- en Oost-Europa scheidde tijdens de Koude Oorlog, letterlijk belichaamd door de Berlijnse Muur (1961–1989)."},
+  {t:"Internationale Betrekkingen", q:"Wat was de Biafra-oorlog (1967–1970)?", a:"Een burgeroorlog in Nigeria waarbij de regio Biafra probeerde af te scheiden; eindigde met miljoenen doden door hongersnood en geweld."},
+  {t:"Internationale Betrekkingen", q:"Wat zijn de SDGs (Sustainable Development Goals)?", a:"17 duurzame ontwikkelingsdoelen van de VN (Agenda 2030), gericht op het uitbannen van armoede, ongelijkheid en klimaatverandering wereldwijd."},
+
+  // === ECONOMIE EN MAATSCHAPPIJ ===
+  {t:"Economie & Maatschappij", q:"Wat is de welvaartsstaat en welke landen zijn hier exemplarisch voor?", a:"Een staat die zorgt voor sociale zekerheid, zorg en onderwijs voor alle burgers; Scandinavische landen en Nederland gelden als voorbeelden."},
+  {t:"Economie & Maatschappij", q:"Wat is het verschil tussen kapitalisme en socialisme?", a:"Kapitalisme: privé-eigendom van productiemiddelen, vrije markt. Socialisme: collectieve of staatseigendom van productiemiddelen, gericht op gelijkheid."},
+  {t:"Economie & Maatschappij", q:"Wat is globalisering?", a:"De toenemende economische, culturele en politieke verwevenheid van landen wereldwijd door technologie, handel en communicatie."},
+  {t:"Economie & Maatschappij", q:"Wat is feminisme als historische beweging?", a:"Een politieke en sociale beweging die strijdt voor gelijke rechten en kansen voor vrouwen; in golven: kiesrecht (1e), seksuele vrijheid (2e), intersectionaliteit (3e)."},
+  {t:"Economie & Maatschappij", q:"Wat was de Oliecrisis van 1973 en welke gevolgen had ze?", a:"Arabische OPEC-landen stopten de olie-export naar westerse landen als reactie op steun aan Israël; leidde tot energiecrisis, recessie en autoloze zondagen."},
+
+  // === CULTUURGESCHIEDENIS ===
+  {t:"Cultuurgeschiedenis", q:"Wat zijn de kenmerken van de Renaissance?", a:"Een culturele hergeboorte (14e–17e eeuw) gebaseerd op de klassieke Oudheid: individualisme, perspectief in kunst, humanisme en wetenschappelijke interesse."},
+  {t:"Cultuurgeschiedenis", q:"Wat is de Wetenschappelijke Revolutie (17e eeuw)?", a:"Een periode van snelle wetenschappelijke vooruitgang waarbij het heliocentrisme (Copernicus, Galileo), wiskunde (Newton) en empirische methode centraal kwamen."},
+  {t:"Cultuurgeschiedenis", q:"Wat zijn de kenmerken van de Romantiek (vroege 19e eeuw)?", a:"Reactie op Verlichting en industrialisatie: nadruk op gevoel, natuur, het verleden, volksidentiteit en het sublieme."},
+  {t:"Cultuurgeschiedenis", q:"Wat is secularisering?", a:"Het proces waarbij religie minder invloed krijgt op het openbare leven, politiek en individuen — een dominant proces in West-Europa na de 19e eeuw."},
+
+  // === SLOTBATCH ===
+  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat was de rol van propaganda in het nationaalsocialisme?", a:"Propaganda (o.a. via Goebbels) was essentieel: films, radio, massameetings en posters verspreidden het nazi-wereldbeeld en mobiliseerden de bevolking."},
+  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat was het Apartheidsregime en wanneer eindigde het?", a:"Rassenapartheidssysteem in Zuid-Afrika (1948–1994), eindigend na internationale sancties en de vrijlating van Nelson Mandela en de eerste democratische verkiezingen."},
+  {t:"Historisch Denken", q:"Wat is het begrip 'de lange termijn' (longue durée) in de geschiedschrijving?", a:"Het concept van Fernand Braudel: grote historische processen die zich over eeuwen afspelen (klimaat, geografie, mentaliteitsgeschiedenis), vs. korte-termijnevenementen."},
+  {t:"Nederland Specifiek", q:"Wat was de Indonesische Bersiap-periode?", a:"Een gewelddadige periode (1945–1946) in Indonesië na de Japanse capitulatie, waarbij Indonesische nationalisten Europese en Chinese burgers aanvielen."},
+  {t:"Internationale Betrekkingen", q:"Wat was het Warschaupact?", a:"Het militaire bondgenootschap van de Sovjet-Unie en Oost-Europese satellietstaten (1955–1991), als tegenhanger van de NAVO."},
+  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat is het Sociaal Darwinisme?", a:"De mistoepassing van Darwins evolutietheorie op menselijke samenlevingen: het idee dat 'sterkere' rassen of klassen van nature domineren — gebruikte rechtvaardiging voor imperialisme en racisme."},
+  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat was de Glorious Revolution (1688) in Engeland?", a:"De vreedzame machtsovername door Willem III van Oranje; leidde tot de Bill of Rights en vestiging van een constitutionele monarchie met parlementaire suprematie."},
+  {t:"Cultuurgeschiedenis", q:"Wat is de betekenis van de boekdrukkunst voor de Reformatie?", a:"Gutenbergs drukpers (ca. 1450) maakte massaverspreiding van teksten mogelijk, waardoor Luthers ideeën razendsnel door Europa konden worden verspreid."}
+];
+
+let deck = [];
+let current = null;
+let flipped = false;
+let statsTotal = 0, statsGood = 0, statsWrong = 0;
+let rolling = [];
+
+function shuffle(arr) {
+  let a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function init() {
+  deck = shuffle(ALL_CARDS.slice());
+  statsTotal = 0; statsGood = 0; statsWrong = 0;
+  rolling = [];
+  document.getElementById('finished-area').classList.add('hidden');
+  document.getElementById('game-area').classList.remove('hidden');
+  updateStats();
+  renderRolling();
+  next();
+}
+
+function next() {
+  if (deck.length === 0) {
+    showFinished();
+    return;
+  }
+  current = deck.shift();
+  flipped = false;
+  document.getElementById('tijdvak-badge').textContent = current.t;
+  document.getElementById('card-label').textContent = 'Vraag';
+  document.getElementById('card-text').textContent = current.q;
+  document.getElementById('card-hint').textContent = 'Tik om antwoord te zien';
+  document.getElementById('card').classList.remove('flip');
+  document.getElementById('btn-flip-row').classList.remove('hidden');
+  document.getElementById('btn-answer-row').classList.add('hidden');
+  document.getElementById('question-counter').textContent = (ALL_CARDS.length - deck.length) + ' / ' + ALL_CARDS.length;
+  updateProgressBar();
+}
+
+function flipCard() {
+  if (flipped) return;
+  flipped = true;
+  document.getElementById('card-label').textContent = 'Antwoord';
+  document.getElementById('card-text').textContent = current.a;
+  document.getElementById('card-hint').textContent = '';
+  document.getElementById('card').classList.add('flip');
+  document.getElementById('btn-flip-row').classList.add('hidden');
+  document.getElementById('btn-answer-row').classList.remove('hidden');
+}
+
+function answer(correct) {
+  statsTotal++;
+  if (correct) {
+    statsGood++;
+    rolling.push('g');
+  } else {
+    statsWrong++;
+    rolling.push('w');
+    deck.push(current);
+  }
+  if (rolling.length > 20) rolling.shift();
+  updateStats();
+  renderRolling();
+  next();
+}
+
+function updateStats() {
+  document.getElementById('s-total').textContent = statsTotal;
+  document.getElementById('s-good').textContent = statsGood;
+  document.getElementById('s-wrong').textContent = statsWrong;
+  if (rolling.length > 0) {
+    let gCount = rolling.filter(x => x === 'g').length;
+    let pct = Math.round((gCount / rolling.length) * 100);
+    document.getElementById('s-ratio').textContent = pct + '%';
+  } else {
+    document.getElementById('s-ratio').textContent = '—';
+  }
+}
+
+function renderRolling() {
+  let container = document.getElementById('rolling-dots');
+  container.innerHTML = '';
+  for (let i = 0; i < 20; i++) {
+    let dot = document.createElement('div');
+    dot.className = 'dot';
+    if (i < rolling.length) {
+      dot.classList.add(rolling[i]);
+    } else {
+      dot.classList.add('empty');
+    }
+    container.appendChild(dot);
+  }
+  if (rolling.length > 0) {
+    let gCount = rolling.filter(x => x === 'g').length;
+    let pct = Math.round((gCount / rolling.length) * 100);
+    document.getElementById('rolling-pct').textContent = pct + '%';
+  } else {
+    document.getElementById('rolling-pct').textContent = '—';
+  }
+}
+
+function updateProgressBar() {
+  let done = statsGood;
+  let pct = Math.round((done / ALL_CARDS.length) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+function showFinished() {
+  document.getElementById('game-area').classList.add('hidden');
+  document.getElementById('finished-area').classList.remove('hidden');
+  document.getElementById('f-good').textContent = statsGood;
+  document.getElementById('f-wrong').textContent = statsWrong;
+}
+
+function restart() {
+  init();
+}
+
+function confirmReset() {
+  if (statsTotal === 0 || confirm('Weet je zeker dat je opnieuw wilt beginnen? Je voortgang gaat verloren.')) {
+    init();
+  }
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
