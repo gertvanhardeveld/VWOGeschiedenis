@@ -70,11 +70,15 @@
     font-weight: 600;
     color: #555;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
     background: #e8e6df;
     padding: 3px 10px;
     border-radius: 20px;
     display: inline-block;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .card {
@@ -103,8 +107,18 @@
   }
   .card.flip .card-label { color: #2a9d5c; }
 
+  .ka-tag {
+    font-size: 10px;
+    color: #aaa;
+    background: #f0ede6;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 2px;
+  }
+
   .card-text {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 500;
     line-height: 1.5;
     flex: 1;
@@ -137,7 +151,7 @@
   .btn-flip { background: #2c3e50; color: white; }
   .btn-good { background: #4cd964; color: #1a4a25; }
   .btn-wrong { background: #ff6b6b; color: #5a0000; }
-  .btn-skip { background: #e8e6df; color: #555; font-size: 13px; }
+  .btn-reset { background: #e8e6df; color: #555; font-size: 12px; padding: 5px 10px; border-radius: 8px; }
 
   .rolling-bar {
     background: white;
@@ -159,12 +173,10 @@
     height: 10px;
     border-radius: 50%;
     background: #e0ddd5;
-    transition: background 0.3s;
     flex-shrink: 0;
   }
   .dot.g { background: #4cd964; }
   .dot.w { background: #ff6b6b; }
-  .dot.empty { background: #e0ddd5; }
 
   .finished {
     text-align: center;
@@ -176,20 +188,14 @@
   .finished h2 { font-size: 22px; margin-bottom: 8px; }
   .finished p { color: #666; margin-bottom: 16px; font-size: 15px; }
   .btn-restart { background: #2c3e50; color: white; width: 100%; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 600; border: none; cursor: pointer; }
-
   .hidden { display: none !important; }
-
-  #question-counter {
-    font-size: 12px;
-    color: #999;
-    text-align: right;
-  }
+  #question-counter { font-size: 12px; color: #999; white-space: nowrap; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>📚 Geschiedenis VWO — Flashcards 2026</h1>
+  <h1>📚 Geschiedenis VWO — Syllabus CE 2026</h1>
   <div class="stats-row">
     <div class="stat">
       <div class="stat-val" id="s-total">0</div>
@@ -215,16 +221,19 @@
 
 <main>
   <div id="game-area">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
       <span class="tijdvak-badge" id="tijdvak-badge">Tijdvak 1</span>
       <div style="display:flex; align-items:center; gap:8px;">
         <span id="question-counter"></span>
-        <button onclick="confirmReset()" style="background:#e8e6df; color:#555; border:none; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:600; cursor:pointer;">↺ Reset</button>
+        <button class="btn-reset" onclick="confirmReset()">↺ Reset</button>
       </div>
     </div>
 
     <div class="card" id="card" onclick="flipCard()">
-      <div class="card-label" id="card-label">Vraag</div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div class="card-label" id="card-label">Vraag</div>
+        <span class="ka-tag" id="ka-tag"></span>
+      </div>
       <div class="card-text" id="card-text">Laden…</div>
       <div class="card-hint" id="card-hint">Tik om antwoord te zien</div>
     </div>
@@ -265,145 +274,453 @@
 
 <script>
 const ALL_CARDS = [
-  // === TIJDVAK 1: Jagers en boeren ===
-  {t:"Tijdvak 1 — Jagers & Boeren", q:"Wat wordt verstaan onder de 'neolithische revolutie'?", a:"De overgang van een nomadische, jagende en verzamelende levensstijl naar een sedentaire, agrarische samenleving (ca. 10.000 v.Chr.)."},
-  {t:"Tijdvak 1 — Jagers & Boeren", q:"Wat zijn kenmerkende aspecten van de prehistorie als het gaat om religie en rituelen?", a:"Animistisch geloof, aanbidding van natuurkrachten, grafgiften en megalithische bouwwerken (zoals dolmens en hunebedden)."},
-  {t:"Tijdvak 1 — Jagers & Boeren", q:"Welke gevolgen had de introductie van landbouw voor de sociale ongelijkheid?", a:"Landbouwoverschotten leidden tot specialisatie, handel en eigendom, waardoor sociale lagen ontstonden en ongelijkheid toenam."},
-  {t:"Tijdvak 1 — Jagers & Boeren", q:"Wat is het kenmerkende aspect van de verspreiding van landbouw in Europa?", a:"De landbouw verspreidde zich vanuit het Nabije Oosten (Vruchtbare Halvemaan) richting Europa via migratie en culturele overdracht."},
 
-  // === TIJDVAK 2: Grieken en Romeinen ===
-  {t:"Tijdvak 2 — Grieken & Romeinen", q:"Wat zijn de kenmerken van de Griekse democratie in Athene?", a:"Directe democratie voor mannelijke burgers, volksassemblee (ekklesia), loting voor ambtelijke functies, uitsluiting van vrouwen en slaven."},
-  {t:"Tijdvak 2 — Grieken & Romeinen", q:"Wat is de Polis?", a:"De Griekse stadstaat, bestaand uit een stad en het omringende platteland, met eigen bestuur, wetten en burgeridentiteit."},
-  {t:"Tijdvak 2 — Grieken & Romeinen", q:"Welke staatsvorm had de Romeinse Republiek (509–27 v.Chr.)?", a:"Een aristocratische republiek met twee consuls, een Senaat en volksvertegenwoordigingen (comitia). De macht lag bij de patricische elite."},
-  {t:"Tijdvak 2 — Grieken & Romeinen", q:"Wat was het belang van het Romeinse recht voor de Europese beschaving?", a:"Het Romeinse recht (o.a. de Twaalf Tafelen) vormt de basis van het huidige continentaal-Europese rechtsstelsel: rechtszekerheid, eigendomsrecht en burgerrechten."},
-  {t:"Tijdvak 2 — Grieken & Romeinen", q:"Wat zijn de oorzaken van de val van het West-Romeinse Rijk (476 n.Chr.)?", a:"Militaire druk van Germaanse volksstammen, economische crisis, politieke instabiliteit, overstrekte grenzen en ontvlechting van het rijk."},
-  {t:"Tijdvak 2 — Grieken & Romeinen", q:"Wat is het Hellenisme?", a:"De periode na Alexander de Grote (323–31 v.Chr.) waarin Griekse cultuur en taal zich mengden met oosterse tradities in een groot deel van de bekende wereld."},
-  {t:"Tijdvak 2 — Grieken & Romeinen", q:"Wat is het verschil tussen patriciërs en plebejers in Rome?", a:"Patriciërs waren de oorspronkelijke adellijke families met politieke privileges; plebejers waren de gewone burgers die geleidelijk via de Standstrijd meer rechten verkregen."},
+// ============================================================
+// TIJDVAK 1 — Jagers en Boeren
+// ============================================================
+{t:"Tijdvak 1", ka:"KA1: jagers-verzamelaars",
+ q:"Wat zijn de belangrijkste kenmerken van de levenswijze van jagers-verzamelaars?",
+ a:"Nomadisch bestaan, kleine groepen, geen eigendom van grond, afhankelijk van seizoenen, gebruik van vuursteen en bot, animistisch geloof en grafgiften als teken van ritueel leven."},
 
-  // === TIJDVAK 3: Monniken en ridders ===
-  {t:"Tijdvak 3 — Monniken & Ridders", q:"Wat is feodalisme?", a:"Een middeleeuws politiek-economisch systeem waarbij heren aan vazallen land (leen) gaven in ruil voor militaire dienst en trouw."},
-  {t:"Tijdvak 3 — Monniken & Ridders", q:"Welke rol speelde de Katholieke Kerk in de vroegmiddeleeuwse samenleving?", a:"De Kerk was de dominante culturele, politieke en economische macht: beheerde onderwijs, ziekenhuizen, bood legitimatie aan koningen en hief tienden."},
-  {t:"Tijdvak 3 — Monniken & Ridders", q:"Wat was de Investituurstrijd?", a:"Het conflict (11e–12e eeuw) tussen pausen en keizers over de vraag wie het recht had bisschoppen en abten te benoemen (te investeren)."},
-  {t:"Tijdvak 3 — Monniken & Ridders", q:"Wat waren de Kruistochten en wat was hun doel?", a:"Militaire expedities (1096–1291) door Europese christenen om Jeruzalem en het Heilige Land te veroveren op moslimheersers, goedgekeurd door de paus."},
-  {t:"Tijdvak 3 — Monniken & Ridders", q:"Wat is de betekenis van het Concordaat van Worms (1122)?", a:"Het compromis tussen paus Calixtus II en keizer Hendrik V: de kerk benoemt geestelijken, de keizer belent hen met wereldlijke macht — scheiding kerk en staat."},
-  {t:"Tijdvak 3 — Monniken & Ridders", q:"Wat is de Reconquista?", a:"De eeuwenlange herovering van het Iberisch Schiereiland door christelijke koninkrijken op de moslimse heersers (711–1492)."},
+{t:"Tijdvak 1", ka:"KA2: landbouwsamenlevingen",
+ q:"Wat zijn de gevolgen van het ontstaan van landbouw voor de samenleving?",
+ a:"Sedentaire levensstijl, bevolkingsgroei, eigendom van land, specialisatie van arbeid, sociale ongelijkheid, overschotten die handel mogelijk maken en de basis leggen voor steden."},
 
-  // === TIJDVAK 4: Steden en staten ===
-  {t:"Tijdvak 4 — Steden & Staten", q:"Wat zijn de oorzaken van de opkomst van steden in de middeleeuwen (11e–13e eeuw)?", a:"Landbouwoverschotten, bevolkingsgroei, opkomst van handel en ambacht, en de vestiging van markten en jaarmarkten."},
-  {t:"Tijdvak 4 — Steden & Staten", q:"Wat is een Hanzeatische stad?", a:"Een lid van de Hanze, een handelsverbond van Noord-Europese steden (13e–17e eeuw) dat de handel in de Noordzee- en Oostzeeregio domineerde."},
-  {t:"Tijdvak 4 — Steden & Staten", q:"Wat was de Zwarte Dood en welke gevolgen had het?", a:"De pestepidemie (1347–1353) doodde ca. 30–50% van de Europese bevolking, leidde tot arbeidstekort, sociale onrust en religieuze twijfel."},
-  {t:"Tijdvak 4 — Steden & Staten", q:"Wat zijn de kenmerken van een centraliserend vorstendom?", a:"Een staatsvorm waarbij de vorst gezag centraliseert via een professioneel leger, belastingstelsel, bureaucratie en wetten — ten koste van de adel en steden."},
-  {t:"Tijdvak 4 — Steden & Staten", q:"Wat is de betekenis van de Magna Carta (1215)?", a:"Het Engelse document dat de macht van de koning beperkte en rechten van edelen vastlegde; beschouwd als vroeg voorbeeld van constitutioneel bestuur."},
-  {t:"Tijdvak 4 — Steden & Staten", q:"Wat waren gilden en welke rol speelden zij in de middeleeuwse economie?", a:"Beroepsverenigingen van ambachtslieden en kooplieden die kwaliteit, prijzen en toegang tot het beroep reguleerden."},
+{t:"Tijdvak 1", ka:"KA3: eerste steden",
+ q:"Welke sociaaleconomische en politieke veranderingen gingen gepaard met het ontstaan van de eerste stedelijke gemeenschappen?",
+ a:"Ontstaan van bestuurselites, schrijfkunst voor administratie, arbeidsdeling, tempels als economisch centrum, irrigatiesystemen en vroege staatsvorm (bijv. Mesopotamië, Sumerische stadstaten)."},
 
-  // === TIJDVAK 5: Ontdekkers en hervormers ===
-  {t:"Tijdvak 5 — Ontdekkers & Hervormers", q:"Wat zijn de kenmerken van het humanisme?", a:"Een Renaissance-denktrant (14e–16e eeuw) die de mens centraal stelt, de klassieke Oudheid herleefde en kritisch redeneren bevorderde."},
-  {t:"Tijdvak 5 — Ontdekkers & Hervormers", q:"Wat waren de 95 stellingen van Luther (1517)?", a:"Luthers aanklacht tegen misstanden in de Kerk, met name de aflatenhandel; het startschot van de Reformatie."},
-  {t:"Tijdvak 5 — Ontdekkers & Hervormers", q:"Wat is het verschil tussen lutheranisme en calvinisme?", a:"Lutheranisme: rechtvaardiging door geloof alleen; calvinisme: predestinatieleer (uitverkiezing), soberheid en nadruk op de soevereiniteit van God."},
-  {t:"Tijdvak 5 — Ontdekkers & Hervormers", q:"Wat zijn de gevolgen van de Europese expansie voor Amerika?", a:"Vernietiging van inheemse beschavingen door geweld en ziektes, invoering van slavernij, extractie van grondstoffen en culturele overheersing."},
-  {t:"Tijdvak 5 — Ontdekkers & Hervormers", q:"Wat was het Concilie van Trente (1545–1563)?", a:"De katholieke reactie op de Reformatie: herbevestiging van dogma's, kerkhervorming van binnenuit en versterking van pauselijk gezag."},
-  {t:"Tijdvak 5 — Ontdekkers & Hervormers", q:"Wat was de Columbus-uitwisseling?", a:"De uitwisseling van gewassen, dieren, mensen en ziektekiemen tussen de Oude en Nieuwe Wereld na 1492, met ingrijpende demografische gevolgen."},
-  {t:"Tijdvak 5 — Ontdekkers & Hervormers", q:"Wat is mercantilisme?", a:"Een economisch beleid waarbij staten streven naar maximale export, minimale import en accumulatie van edele metalen om nationale rijkdom te vergroten."},
+// ============================================================
+// TIJDVAK 2 — Grieken en Romeinen
+// ============================================================
+{t:"Tijdvak 2", ka:"KA4: democratie Athene",
+ q:"Wat zijn de kenmerken van de democratie in Athene, zoals bedoeld bij het denken over burgerschap en politiek in de Griekse stadstaat?",
+ a:"Directe democratie via de volksvergadering (ekklesia), loting voor ambten, actief burgerschap — maar alleen voor vrije mannelijke burgers; vrouwen, slaven en vreemdelingen uitgesloten."},
 
-  // === TIJDVAK 6: Regenten en vorsten ===
-  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat zijn de kenmerken van het absolutisme?", a:"Een staatsvorm waarbij de vorst alle macht concentreert: geen parlement, geen onafhankelijke rechtspraak, beroep op goddelijk recht ('l'état c'est moi')."},
-  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat was de Nederlandse Opstand (1568–1648) en waardoor ontstond hij?", a:"Opstand van de Nederlanden tegen Spaans gezag door belastingdruk, inquisitie, centralisatiebeleid van Filips II en calvinistische religie."},
-  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat was de Vrede van Westfalen (1648) en waarom is hij historisch belangrijk?", a:"Het einde van de Dertigjarige Oorlog; erkende de soevereiniteit van staten en het principe van non-interventie — grondslag van het moderne statenstelsel."},
-  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat waren de kenmerken van de Republiek der Zeven Verenigde Nederlanden?", a:"Een federale republiek met regentenaristocratie, religieuze tolerantie, dominante handelselite en geen erfelijk koningschap."},
-  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat was de VOC en wat maakte haar bijzonder?", a:"De Verenigde Oost-Indische Compagnie (1602): 's werelds eerste naamloze vennootschap met aandelenkapitaal, monopolie op Aziatische handel en quasi-staatsmacht."},
-  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat is het verschil tussen een stadhouder en een pensionaris in de Republiek?", a:"De stadhouder (bijv. Willem van Oranje) was de militaire en politieke leider; de raadpensionaris (bijv. Johan de Witt) leidde de Staten van Holland."},
-  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat zijn de kenmerken van de Verlichting (17e–18e eeuw)?", a:"Geloof in de rede, vooruitgang, wetenschappelijk denken, kritiek op kerk en absolutisme; vertegenwoordigers: Locke, Voltaire, Rousseau, Montesquieu."},
+{t:"Tijdvak 2", ka:"KA5: klassieke vormentaal",
+ q:"Wat wordt bedoeld met de klassieke vormentaal van de Grieks-Romeinse cultuur, en welke kunstvormen zijn daarbinnen relevant?",
+ a:"Bouwkunst (zuilenorden: Dorisch, Ionisch, Corinthisch; tempels, amfitheaters) en beeldhouwkunst (idealisering van het menselijk lichaam, harmonie en proporties). Basis voor de westerse kunst."},
 
-  // === TIJDVAK 7: Pruiken en revoluties ===
-  {t:"Tijdvak 7 — Pruiken & Revoluties", q:"Wat waren de oorzaken van de Franse Revolutie (1789)?", a:"Financiële crisis van de staat, hongersnood, sociale ongelijkheid (standenmaatschappij), Verlichtingsideeën en zwak leiderschap van Lodewijk XVI."},
-  {t:"Tijdvak 7 — Pruiken & Revoluties", q:"Wat staat er in de Déclaration des droits de l'homme et du citoyen (1789)?", a:"Gelijkheid voor de wet, vrijheid van meningsuiting, volkssoevereiniteit, eigendomsrecht en het recht op weerstand tegen tirannie."},
-  {t:"Tijdvak 7 — Pruiken & Revoluties", q:"Wat is de Terreur (1793–1794)?", a:"De periode onder Robespierre en het Comité de salut public waarin duizenden 'vijanden van de revolutie' werden geguillotineerd."},
-  {t:"Tijdvak 7 — Pruiken & Revoluties", q:"Wat waren de gevolgen van de Napoleontische oorlogen voor Europa?", a:"Verspreiding van Verlichtingsidealen en de Napoleontische Code, nationale bewustwording, herordening van grenzen op het Congres van Wenen (1815)."},
-  {t:"Tijdvak 7 — Pruiken & Revoluties", q:"Wat regelde het Congres van Wenen (1814–1815)?", a:"De restauratie van de Europese grenzen na Napoleon, herstel van de monarchieën en het vestigen van een machtsevenwicht om toekomstige oorlogen te voorkomen."},
-  {t:"Tijdvak 7 — Pruiken & Revoluties", q:"Wat is het verschil tussen liberalisme en nationalisme in de 19e eeuw?", a:"Liberalisme streeft naar individuele vrijheid, grondwet en beperking van staatsmacht; nationalisme streeft naar de vorming van een staat op basis van gedeelde taal, cultuur en identiteit."},
-  {t:"Tijdvak 7 — Pruiken & Revoluties", q:"Wat was de Bataafse Republiek?", a:"De Nederlandse republiek (1795–1806) die na de Patriottenrevolutie en de Franse inval werd gevestigd, met een meer democratische grondwet."},
+{t:"Tijdvak 2", ka:"KA6: groei Romeins imperium",
+ q:"Wat zijn de oorzaken van de groei van het Romeinse imperium, en hoe beïnvloedden Romeinen en veroverde volkeren elkaar cultureel?",
+ a:"Effectief leger, infrastructuur (wegen, aquaducten), bestuurlijke organisatie. Culturele uitwisseling: Romeinen namen Griekse religie, kunst en filosofie over; veroverde volkeren romaniseerden geleidelijk."},
 
-  // === TIJDVAK 8: Burgers en stoommachines ===
-  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat zijn de voorwaarden voor de Industriële Revolutie in Engeland?", a:"Beschikbaarheid van steenkool en ijzer, koloniale grondstoffen, vrijhandel, kapitalisme, technologische innovaties (stoommachine), en een flexibele arbeidersklasse."},
-  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat is het verschil tussen de eerste en tweede industriële revolutie?", a:"1e (ca. 1760–1840): stoom, textiel, staal. 2e (ca. 1870–1914): elektriciteit, chemie, verbrandingsmotor, massaproductie (Fordisme)."},
-  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat zijn de sociale gevolgen van de industrialisatie?", a:"Verstedelijking, groei van het proletariaat, slechte arbeidsomstandigheden, kinderarbeid, vakbondsvorming en opkomst van het socialisme."},
-  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat zijn de kernideeën van het marxisme?", a:"Klassenstrijd tussen bourgeoisie en proletariaat, meerwaarde-theorie, historisch materialisme en het streven naar een klasseloze samenleving via revolutie."},
-  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat is imperialisme in de context van de 19e eeuw?", a:"De politiek van Europese mogendheden om Aziatische en Afrikaanse gebieden te veroveren, exploiteren en besturen als koloniën."},
-  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat was de Conferentie van Berlijn (1884–1885)?", a:"Europese mogendheden verdeelden Afrika onderling ('Scramble for Africa') zonder rekening te houden met inheemse volkeren of grenzen."},
-  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat waren de kenmerken van de verzuiling in Nederland?", a:"De organisatie van de samenleving langs religieuze en ideologische zuilen (protestants, katholiek, socialistisch, liberaal) met eigen scholen, media en politieke partijen."},
-  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat zijn de vier hoofdoorzaken van de Eerste Wereldoorlog (MAIN)?", a:"Militarisme, Alliantiestelsel (Triple Entente vs. Triple Alliantie), Imperialisme en Nationalisme; aanleiding: moord op Franz Ferdinand (1914)."},
+{t:"Tijdvak 2", ka:"KA7: Germanen vs. Rome",
+ q:"Wat gebeurde er in de late Oudheid toen Germaanssprekende groepen het Romeinse rijk binnendrongen?",
+ a:"Germaanse volksstammen (Visigoten, Vandalen, Franken) drongen door in het westelijk Rijk, wat leidde tot politieke instabiliteit en uiteindelijk de val van het West-Romeinse Rijk in 476 n.Chr."},
 
-  // === TIJDVAK 9: Wereldoorlogen ===
-  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat zijn de kenmerken van het totalitarisme?", a:"Eénpartijstaat, staatscultus, censuur, terreur, propaganda, liquidatie van oppositie en totale controle over economie en privéleven."},
-  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat zijn de overeenkomsten en verschillen tussen fascisme en nationaalsocialisme?", a:"Beide: autoritair, nationalisme, anti-marxisme, geweld. Verschil: nazisme is rassenideologie (antisemitisme, Arisch ras); Italiaans fascisme benadrukt meer de staat."},
-  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat waren de bepalingen en gevolgen van het Verdrag van Versailles (1919)?", a:"Duitsland krijgt oorlogsschuld, verliest grondgebied, betaalt herstelbetalingen — deze vernederende voorwaarden stimuleerden het opkomend nationaalsocialisme."},
-  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat is de Holocaust?", a:"De systematische genocide door de nazi's op zes miljoen Joden en miljoenen anderen (Roma, gehandicapten, homo's, politieke tegenstanders) 1933–1945."},
-  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat was het Molotov–Ribbentroppact (1939)?", a:"Een niet-aanvalsverdrag tussen nazi-Duitsland en de Sovjet-Unie met een geheim protocol over de verdeling van Oost-Europa; maakte de aanval op Polen mogelijk."},
-  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat was de rol van Nederland in de Tweede Wereldoorlog?", a:"Bezetting door Duitsland (mei 1940), deportatie van Joodse Nederlanders, verzet en collaboratie, bevrijding 1944–1945."},
-  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat was de rol van de Volkenbond na de Eerste Wereldoorlog?", a:"Een internationale organisatie voor collectieve veiligheid (1920–1946); faalde door afwezigheid van de VS, geen eigen leger en gebrek aan handhavingsvermogen."},
-  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat zijn de oorzaken van de Grote Depressie (1929)?", a:"Overproductie, beurscrash op Wall Street, bancaire crises, protectionisme en een domino-effect via de internationale handelsketens."},
-  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat was de New Deal?", a:"Het economisch herstelbeleid van Roosevelt (1933–1939): staatsinterventie, sociale zekerheid, werkverschaffingsprogramma's — afwijzing van laissez-faire."},
+{t:"Tijdvak 2", ka:"KA8: jodendom en christendom",
+ q:"Hoe verhouden het jodendom en het christendom zich tot elkaar, en welke rol speelde het christendom in het Romeinse rijk?",
+ a:"Het christendom kwam voort uit het jodendom (Jezus als Joodse profeet). Na eeuwen van vervolging werd het christendom staatsgodsdienst onder keizer Theodosius I (380 n.Chr.)."},
 
-  // === TIJDVAK 10: Televisie en computer ===
-  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat is de Koude Oorlog en wie waren de hoofdrolspelers?", a:"Een ideologisch en geopolitiek conflict (1947–1991) tussen de VS (kapitalisme/democratie) en de Sovjet-Unie (communisme), nooit uitmonsterend in directe oorlog."},
-  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat is de Trumandoctrine?", a:"Het Amerikaanse beleid (1947) om communistische expansie in te dammen door militaire en economische steun aan landen die door communisme werden bedreigd."},
-  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat was de Cubacrisis (1962)?", a:"Twaalf-daagse confrontatie tussen de VS en USSR over Sovjet-raketten op Cuba; het dieptepunt van de Koude Oorlog, eindigend in een compromis."},
-  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat was de Marshallhulp?", a:"Amerikaans hulpprogramma (1948–1952) dat West-Europa economisch herstelde na WWII, ook bedoeld om communistische invloed in te dammen."},
-  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat zijn de oorzaken van de dekolonisatie na 1945?", a:"Nationalisme in koloniën, verzwakking van Europese mogendheden door WWII, druk van VS en VN, en het principe van zelfbeschikking."},
-  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat was de onafhankelijkheidsstrijd van Indonesië?", a:"Na de Japanse bezetting riep Soekarno in 1945 de onafhankelijkheid uit; na twee 'politionele acties' erkende Nederland in 1949 de soevereiniteit."},
-  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat zijn de fundamenten van de Europese integratie?", a:"Economische samenwerking (EGKS 1951, EEG 1957) als middel voor vrede, geïnspireerd door Schuman en Adenauer; groeide uit tot de EU."},
-  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat is apartheid?", a:"Het Zuid-Afrikaanse systeem van rassenscheiding (1948–1994) waarbij de zwarte bevolking politiek, economisch en sociaal werd onderdrukt."},
-  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat was de val van de Berlijnse Muur (1989) en wat volgde?", a:"Op 9 november 1989 opende de DDR de grens; het leidde tot de hereniging van Duitsland (1990) en het uiteenvallen van de Sovjet-Unie (1991)."},
-  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat zijn de kenmerken van de welvaartstaat (verzorgingsstaat)?", a:"Staatszorg voor alle burgers via sociale zekerheid, gezondheidszorg, onderwijs en pensioenen; gebaseerd op het Beveridge-rapport (1942)."},
+// ============================================================
+// TIJDVAK 3 — Monniken en Ridders
+// ============================================================
+{t:"Tijdvak 3", ka:"KA9: verspreiding christendom",
+ q:"Hoe verspreidde het christendom zich door Europa, en welke actoren speelden daarin een rol?",
+ a:"Geleidelijk proces via monniken (kloosterorden) en de politieke elite. Soms van bovenaf (vorst bekeerde zich eerst), soms via syncretisme (inlijving van heidense rituelen). Bijv. Bonifatius in Germania."},
 
-  // === EXTRA BEGRIPPEN en CONCEPTEN ===
-  {t:"Historisch Denken", q:"Wat is het verschil tussen oorzaak en aanleiding in historische analyse?", a:"Een oorzaak is een structurele factor die een gebeurtenis mogelijk maakt; een aanleiding is de directe, concrete trigger die het proces op gang brengt."},
-  {t:"Historisch Denken", q:"Wat wordt bedoeld met 'historisch besef'?", a:"Het vermogen om het verleden te begrijpen vanuit de eigen tijd en context, en daarmee het heden en de toekomst in perspectief te plaatsen."},
-  {t:"Historisch Denken", q:"Wat is de betekenis van continuïteit en verandering in de geschiedschrijving?", a:"Continuïteit: wat blijft hetzelfde door de tijd heen. Verandering: wat anders wordt. Historici analyseren het samenspel van beide."},
-  {t:"Historisch Denken", q:"Wat zijn primaire en secundaire bronnen?", a:"Primaire bron: een document uit de bestudeerde periode (dagboek, wet, foto). Secundaire bron: een latere interpretatie of analyse van primaire bronnen."},
-  {t:"Historisch Denken", q:"Wat is anachronisme in historiografie?", a:"Het toepassen van hedendaagse normen, begrippen of waarden op een historische situatie waarvoor ze niet gelden."},
-  {t:"Historisch Denken", q:"Wat zijn de tien tijdvakken van de Nederlandse Canon?", a:"1: Jagers en boeren, 2: Grieken en Romeinen, 3: Monniken en ridders, 4: Steden en staten, 5: Ontdekkers en hervormers, 6: Regenten en vorsten, 7: Pruiken en revoluties, 8: Burgers en stoommachines, 9: Wereldoorlogen, 10: Televisie en computer."},
-  {t:"Historisch Denken", q:"Wat is historiografie?", a:"De studie van de manier waarop geschiedenis is geschreven en hoe historische interpretaties door de tijd heen veranderen."},
+{t:"Tijdvak 3", ka:"KA10: islam",
+ q:"Wat zijn de kernideeën van de islam en hoe verspreidde de islam zich?",
+ a:"Kernideeën: één God (Allah), Mohammed als profeet, vijf zuilen (geloofsuitspraak, gebed, vasten, aalmoezen, hadj). Verspreiding via verovering én handel vanuit het Arabisch Schiereiland (7e eeuw) naar Noord-Afrika, Spanje en Azië."},
 
-  // === NEDERLAND SPECIFIEK ===
-  {t:"Nederland Specifiek", q:"Wat was de Unie van Utrecht (1579)?", a:"Een defensief verbond van zeven noordelijke gewesten dat de basis legde voor de Republiek der Zeven Verenigde Nederlanden."},
-  {t:"Nederland Specifiek", q:"Wat was de Acte van Verlatinghe (1581)?", a:"De officiële verklaring van de Staten-Generaal die Filips II afzette als soeverein; beschouwd als de eerste onafhankelijkheidsverklaring in Europa."},
-  {t:"Nederland Specifiek", q:"Wat was de Gouden Eeuw van Nederland?", a:"De 17e eeuw, gekenmerkt door economische bloei via de VOC en WIC, culturele hoogbloei (Rembrandt, Vermeer), en internationale politieke invloed."},
-  {t:"Nederland Specifiek", q:"Wat was de WIC en wat was haar rol in de slavenhandel?", a:"De West-Indische Compagnie (1621): handelde in suiker, huiden en had een centrale rol in de trans-Atlantische slavenhandel vanuit West-Afrika naar Amerika."},
-  {t:"Nederland Specifiek", q:"Wanneer en hoe werd het Koninkrijk der Nederlanden opgericht?", a:"In 1813, na de ineenstorting van Napoleons rijk; Willem I werd soeverein vorst, in 1815 verhoogd tot koning."},
-  {t:"Nederland Specifiek", q:"Wat was de Schoolstrijd in Nederland?", a:"Het 19e-eeuwse politieke conflict over financiering van bijzonder (religieus) onderwijs, opgelost met de Pacificatie van 1917 (gelijkstelling openbaar en bijzonder onderwijs)."},
-  {t:"Nederland Specifiek", q:"Wat was Operatie Market Garden (1944)?", a:"Een geallieerde operatie waarbij luchtlandingstroepen belangrijke bruggen in Nederland innamen; eindigde in een mislukking bij Arnhem."},
+{t:"Tijdvak 3", ka:"KA11: hofstelsel en horigheid",
+ q:"Wat is het causale verband tussen de ondergang van het West-Romeinse Rijk en het ontstaan van een zelfvoorzienende agrarische samenleving met hofstelsel en horigheid?",
+ a:"De ineenstorting van het Rijk vernietigde de handel, de steden en de monetaire economie. Mensen trokken naar het platteland. Grootgrondbezitters (heren) boden bescherming in ruil voor arbeid — het hofstelsel ontstond, met horigen die grond bewerkten zonder vrijheid."},
 
-  // === INTERNATIONALE BETREKKINGEN ===
-  {t:"Internationale Betrekkingen", q:"Wat is de VN en wanneer werd ze opgericht?", a:"De Verenigde Naties, opgericht in 1945 na WWII om internationale vrede en veiligheid te bewaren via collectieve veiligheid en diplomatie."},
-  {t:"Internationale Betrekkingen", q:"Wat is de NAVO?", a:"Het Noord-Atlantisch Verdragsorganisatie (1949): een militair bondgenootschap van westerse democratieën, opgericht als tegenwicht tegen de Sovjet-dreiging."},
-  {t:"Internationale Betrekkingen", q:"Wat is detente?", a:"De ontspanning in de Koude Oorlog (jaren 1970) waarbij VS en USSR dialoog aangingen, wapenbeheersing nastreefden en handelsrelaties verbeterden."},
-  {t:"Internationale Betrekkingen", q:"Wat was het IJzeren Gordijn?", a:"De metaforische en fysieke grens die West- en Oost-Europa scheidde tijdens de Koude Oorlog, letterlijk belichaamd door de Berlijnse Muur (1961–1989)."},
-  {t:"Internationale Betrekkingen", q:"Wat was de Biafra-oorlog (1967–1970)?", a:"Een burgeroorlog in Nigeria waarbij de regio Biafra probeerde af te scheiden; eindigde met miljoenen doden door hongersnood en geweld."},
-  {t:"Internationale Betrekkingen", q:"Wat zijn de SDGs (Sustainable Development Goals)?", a:"17 duurzame ontwikkelingsdoelen van de VN (Agenda 2030), gericht op het uitbannen van armoede, ongelijkheid en klimaatverandering wereldwijd."},
+{t:"Tijdvak 3", ka:"KA12: feodalisme",
+ q:"Wat zijn de kenmerken van feodale verhoudingen in het bestuur?",
+ a:"Hiërarchisch systeem: de koning verleende land (leen) aan edelen (vazallen) in ruil voor militaire dienst en trouw. Vazallen deden hetzelfde met lagere edelen. Macht was persoonlijk, lokaal en gebaseerd op wederzijdse plichten."},
 
-  // === ECONOMIE EN MAATSCHAPPIJ ===
-  {t:"Economie & Maatschappij", q:"Wat is de welvaartsstaat en welke landen zijn hier exemplarisch voor?", a:"Een staat die zorgt voor sociale zekerheid, zorg en onderwijs voor alle burgers; Scandinavische landen en Nederland gelden als voorbeelden."},
-  {t:"Economie & Maatschappij", q:"Wat is het verschil tussen kapitalisme en socialisme?", a:"Kapitalisme: privé-eigendom van productiemiddelen, vrije markt. Socialisme: collectieve of staatseigendom van productiemiddelen, gericht op gelijkheid."},
-  {t:"Economie & Maatschappij", q:"Wat is globalisering?", a:"De toenemende economische, culturele en politieke verwevenheid van landen wereldwijd door technologie, handel en communicatie."},
-  {t:"Economie & Maatschappij", q:"Wat is feminisme als historische beweging?", a:"Een politieke en sociale beweging die strijdt voor gelijke rechten en kansen voor vrouwen; in golven: kiesrecht (1e), seksuele vrijheid (2e), intersectionaliteit (3e)."},
-  {t:"Economie & Maatschappij", q:"Wat was de Oliecrisis van 1973 en welke gevolgen had ze?", a:"Arabische OPEC-landen stopten de olie-export naar westerse landen als reactie op steun aan Israël; leidde tot energiecrisis, recessie en autoloze zondagen."},
+// ============================================================
+// TIJDVAK 4 — Steden en Staten
+// ============================================================
+{t:"Tijdvak 4 / HC Steden & Burgers", ka:"KA13: opkomst handel en ambacht",
+ q:"Welke veranderingen deden zich in Europa voor vanaf de 11e eeuw die de basis legden voor het herleven van een agrarisch-urbane samenleving?",
+ a:"Landbouwinnovaties verhoogden de productie, bevolking groeide, handel herleefde, monetaire economie nam toe. Met name Vlaanderen werd een van de meest verstedelijkte gebieden. Steden als Atrecht werden centra van lakennijverheid en handel."},
 
-  // === CULTUURGESCHIEDENIS ===
-  {t:"Cultuurgeschiedenis", q:"Wat zijn de kenmerken van de Renaissance?", a:"Een culturele hergeboorte (14e–17e eeuw) gebaseerd op de klassieke Oudheid: individualisme, perspectief in kunst, humanisme en wetenschappelijke interesse."},
-  {t:"Cultuurgeschiedenis", q:"Wat is de Wetenschappelijke Revolutie (17e eeuw)?", a:"Een periode van snelle wetenschappelijke vooruitgang waarbij het heliocentrisme (Copernicus, Galileo), wiskunde (Newton) en empirische methode centraal kwamen."},
-  {t:"Cultuurgeschiedenis", q:"Wat zijn de kenmerken van de Romantiek (vroege 19e eeuw)?", a:"Reactie op Verlichting en industrialisatie: nadruk op gevoel, natuur, het verleden, volksidentiteit en het sublieme."},
-  {t:"Cultuurgeschiedenis", q:"Wat is secularisering?", a:"Het proces waarbij religie minder invloed krijgt op het openbare leven, politiek en individuen — een dominant proces in West-Europa na de 19e eeuw."},
+{t:"Tijdvak 4 / HC Steden & Burgers", ka:"KA13: opkomst handel en ambacht",
+ q:"Welke rol speelden jaarmarkten en handelsnetwerken in de opkomst van de middeleeuwse steden?",
+ a:"Via jaarmarkten in Noord-Frankrijk en later via de Hanzesteden verbonden handelaren lokale markten met internationale netwerken, tot aan Italiaanse stadstaten. Brugge groeide uit tot handelscentrum van Noordwest-Europa."},
 
-  // === SLOTBATCH ===
-  {t:"Tijdvak 9 — Wereldoorlogen", q:"Wat was de rol van propaganda in het nationaalsocialisme?", a:"Propaganda (o.a. via Goebbels) was essentieel: films, radio, massameetings en posters verspreidden het nazi-wereldbeeld en mobiliseerden de bevolking."},
-  {t:"Tijdvak 10 — Televisie & Computer", q:"Wat was het Apartheidsregime en wanneer eindigde het?", a:"Rassenapartheidssysteem in Zuid-Afrika (1948–1994), eindigend na internationale sancties en de vrijlating van Nelson Mandela en de eerste democratische verkiezingen."},
-  {t:"Historisch Denken", q:"Wat is het begrip 'de lange termijn' (longue durée) in de geschiedschrijving?", a:"Het concept van Fernand Braudel: grote historische processen die zich over eeuwen afspelen (klimaat, geografie, mentaliteitsgeschiedenis), vs. korte-termijnevenementen."},
-  {t:"Nederland Specifiek", q:"Wat was de Indonesische Bersiap-periode?", a:"Een gewelddadige periode (1945–1946) in Indonesië na de Japanse capitulatie, waarbij Indonesische nationalisten Europese en Chinese burgers aanvielen."},
-  {t:"Internationale Betrekkingen", q:"Wat was het Warschaupact?", a:"Het militaire bondgenootschap van de Sovjet-Unie en Oost-Europese satellietstaten (1955–1991), als tegenhanger van de NAVO."},
-  {t:"Tijdvak 8 — Burgers & Stoommachines", q:"Wat is het Sociaal Darwinisme?", a:"De mistoepassing van Darwins evolutietheorie op menselijke samenlevingen: het idee dat 'sterkere' rassen of klassen van nature domineren — gebruikte rechtvaardiging voor imperialisme en racisme."},
-  {t:"Tijdvak 6 — Regenten & Vorsten", q:"Wat was de Glorious Revolution (1688) in Engeland?", a:"De vreedzame machtsovername door Willem III van Oranje; leidde tot de Bill of Rights en vestiging van een constitutionele monarchie met parlementaire suprematie."},
-  {t:"Cultuurgeschiedenis", q:"Wat is de betekenis van de boekdrukkunst voor de Reformatie?", a:"Gutenbergs drukpers (ca. 1450) maakte massaverspreiding van teksten mogelijk, waardoor Luthers ideeën razendsnel door Europa konden worden verspreid."}
+{t:"Tijdvak 4 / HC Steden & Burgers", ka:"KA14: stedelijke burgerij",
+ q:"Hoe verwierven middeleeuwse steden hun zelfstandigheid?",
+ a:"Stedelingen kochten, bevochten en onderhandelden over stadsrechten. Met stadsrechten verkregen ze eigen rechtbanken, bestuur en belastingregels. Rijke kooplieden organiseerden zich in gilden en kregen zo invloed op het stadsbestuur."},
+
+{t:"Tijdvak 4 / HC Steden & Burgers", ka:"KA14: stedelijke burgerij",
+ q:"Wat was de Guldensporenslag (1302) en welke betekenis had het voor de stedelijke burgerij?",
+ a:"In 1302 versloegen Vlaamse ambachtslieden en boeren een Frans ridderleger bij Kortrijk. Het toonde dat de stedelijke burgerij en het gemeen een serieuze politieke en militaire macht waren tegenover patriciërs en feodale heren."},
+
+{t:"Tijdvak 4 / HC Steden & Burgers", ka:"KA14: stedelijke burgerij",
+ q:"Hoe veranderde de positie van de stedelijke burgerij in de Lage Landen tussen 1302 en 1602?",
+ a:"Steden groeiden in macht maar kwamen onder druk van Bourgondische en later Habsburgse centraliseringspolitiek. Antwerpen nam de rol van Brugge over als handelscentrum. De Opstand (1568) verstoorde alles: Antwerpen verloor haar positie in 1585, kapitaal vluchtte naar Holland."},
+
+{t:"Tijdvak 4", ka:"KA15: investituurstrijd",
+ q:"Wat was het conflict in de christelijke wereld over wie het primaat had — de wereldlijke of geestelijke macht?",
+ a:"De Investituurstrijd (11e–12e eeuw) tussen keizers en pausen over wie bisschoppen mocht benoemen. Opgelost via het Concordaat van Worms (1122): de kerk benoemt geestelijken, de keizer belent hen met wereldlijke macht. Markeerde scheiding kerk–staat."},
+
+{t:"Tijdvak 4", ka:"KA16: kruistochten",
+ q:"Wat waren de kruistochten en wat was hun doel?",
+ a:"Militaire expedities (1096–1291) door Europese christenen om Jeruzalem en het Heilige Land te heroveren op moslims, op oproep van de paus. Tevens uitdrukking van religieus enthousiasme, streven naar aflaat en politieke expansie."},
+
+{t:"Tijdvak 4 / HC Steden & Burgers", ka:"KA17: staatsvorming",
+ q:"Wat kenmerkt het begin van staatsvorming en centralisatie in de late middeleeuwen?",
+ a:"Vorsten probeerden macht te centraliseren via eigen rechtbanken, belastingen en een professioneel ambtenarenapparaat — ten koste van de adel en steden. In de Lage Landen deden de Bourgondische hertogen dit in de 15e eeuw."},
+
+// ============================================================
+// TIJDVAK 5 — Ontdekkers en Hervormers
+// ============================================================
+{t:"Tijdvak 5", ka:"KA18: Europese overzeese expansie",
+ q:"Wat zijn de oorzaken en gevolgen van het begin van de Europese overzeese expansie?",
+ a:"Oorzaken: zoeken naar handelsroutes naar Azië, technologische innovatie (kompas, karaveel), concurrentie tussen Portugal en Spanje, kruistochtsideaal. Gevolgen: Columbus-uitwisseling, opbouw van koloniale rijken, trans-Atlantische slavenhandel, verwoesting inheemse culturen."},
+
+{t:"Tijdvak 5", ka:"KA19: Renaissance",
+ q:"Wat zijn de kenmerken van het veranderende mens- en wereldbeeld van de Renaissance?",
+ a:"Herleving van de klassieke Oudheid, humanisme (de mens centraal), empirische belangstelling voor de natuur, perspectief in beeldende kunst, beginnend wetenschappelijk denken. Startpunt: Italië vanaf het midden van de 14e eeuw."},
+
+{t:"Tijdvak 5", ka:"KA20: heroriëntatie klassieke Oudheid",
+ q:"Op welke manieren uitte de hernieuwde oriëntatie op de klassieke Oudheid zich in de Renaissance?",
+ a:"In bouwkunst (zuilen, koepels, symmetrie), beeldende kunst (realisme, anatomische studie) en het humanisme (bestudering van Griekse en Latijnse teksten, kritisch tekstonderzoek). Figuren: Erasmus, Leonardo da Vinci, Michelangelo."},
+
+{t:"Tijdvak 5 / HC Verlichting", ka:"KA21: protestantse Reformatie",
+ q:"Wat leidde tot de protestantse Reformatie en wat waren de gevolgen voor de christelijke kerk?",
+ a:"Luther (95 stellingen, 1517) keerde zich tegen aflatenhandel en pauselijk gezag. Bijbelvertaling via boekdrukpers verspreidde ideeën snel. Gevolg: splitsing in lutheranisme, calvinisme en anglikanisme; godsdienstoorlogen; Contrareformatie."},
+
+{t:"Tijdvak 5 / HC Steden & Burgers", ka:"KA22: Nederlandse Opstand",
+ q:"Wat waren de oorzaken van het conflict in de Nederlanden dat resulteerde in de stichting van een Nederlandse staat?",
+ a:"Centralisatiepolitiek van Filips II, invoering van de inquisitie, zware belastingen (de Tiende Penning van Alva), calvinistische verspreiding, Beeldenstorm (1566). Onder leiding van Willem van Oranje brak een opstand uit die eindigde in de Republiek (Unie van Utrecht 1579, Acte van Verlatinghe 1581)."},
+
+// ============================================================
+// TIJDVAK 6 — Regenten en Vorsten
+// ============================================================
+{t:"Tijdvak 6 / HC Steden & Burgers + Verlichting", ka:"KA23: absolutisme",
+ q:"Wat zijn de kenmerken van het streven van vorsten naar absolute macht?",
+ a:"Centralisatie van wetgeving, rechtspraak en belastingen. Legitimatie via goddelijk recht (droit divin). Geen onafhankelijk parlement. Voorbeelden: Lodewijk XIV ('l'état c'est moi'), maar ook spanning met steden en adel."},
+
+{t:"Tijdvak 6 / HC Steden & Burgers", ka:"KA24: Nederlandse Republiek",
+ q:"Wat maakte de positie van de Republiek der Zeven Verenigde Nederlanden staatkundig bijzonder?",
+ a:"Geen monarchie maar een federale republiek met soevereine gewesten, regentenaristocratie en stadhouders. Particularisme van steden bleef groot. Religieuze tolerantie trok vluchtelingen en kapitaal aan."},
+
+{t:"Tijdvak 6 / HC Steden & Burgers", ka:"KA24: economische bloei Republiek",
+ q:"Waardoor beleefde de Republiek in de Gouden Eeuw een economische bloei?",
+ a:"Stapelmarktfunctie van Amsterdam, VOC (1602) en WIC voor wereldhandel, koopmansbeurs, investeringen in molens en droogmakerijen. De Dertigjarige Oorlog en Franse binnenlandse onrust begunstigden de Republiek tijdelijk als dominante handelsmacht."},
+
+{t:"Tijdvak 6 / HC Steden & Burgers", ka:"KA24: culturele bloei Republiek",
+ q:"Hoe uitte de culturele bloei van de Republiek zich in de Gouden Eeuw?",
+ a:"Rijke kooplieden als mecenas: Rembrandt en Vermeer vonden een enorme markt. Stadspaleizen, grachtengordel Amsterdam. Relatieve persvrijheid maakte de Republiek tot centrum van wetenschappelijk en filosofisch debat (Spinoza, Descartes woonde er)."},
+
+{t:"Tijdvak 6 / HC Steden & Burgers", ka:"KA25: wereldhandel en handelskapitalisme",
+ q:"Wat wordt bedoeld met handelskapitalisme en het begin van een wereldeconomie in de 17e eeuw?",
+ a:"De VOC (1602) was de eerste naamloze vennootschap met aandelenkapitaal. Via de koopmansbeurs werd risico gespreid. Handel verbond Europa, Azië, Afrika en Amerika. Amsterdam werd centrum van een mondiale economie."},
+
+{t:"Tijdvak 6 / HC Verlichting", ka:"KA26: wetenschappelijke revolutie",
+ q:"Wat was de wetenschappelijke revolutie en welke factoren droegen eraan bij?",
+ a:"17e-eeuwse omwenteling in het wetenschappelijk denken. Bijdragen: ontdekkingsreizen, humanistische tekstanalyse, rationalisme (Descartes), empirisme (Locke/Bacon), Newtons natuurwetten. Leidde tot discussie over positie van godsdienst in de samenleving."},
+
+// ============================================================
+// TIJDVAK 7 — Pruiken en Revoluties
+// ============================================================
+{t:"Tijdvak 7 / HC Verlichting", ka:"KA27: verlicht denken",
+ q:"Wat zijn de kernideeën van de Verlichting en welke denkers zijn daarin centraal?",
+ a:"Toepassing van rede en wetenschap op samenleving, kritiek op traditie en kerk, geloof in vooruitgang. Kerndenkers: Locke (natuurrechten, sociaal contract), Rousseau (volkssoevereiniteit, gelijkheid), Montesquieu (scheiding der machten), Adam Smith (vrijemarkteconomie)."},
+
+{t:"Tijdvak 7 / HC Verlichting", ka:"KA27: verlicht denken",
+ q:"Wat was het belang van de publieke opinie voor de politieke cultuur tijdens de Verlichting?",
+ a:"Voor het eerst moesten vorsten rekening houden met publieke opinie in alle lagen van de bevolking. Nieuwe ideeën werden in salons, kranten en pamfletten besproken. Publicatie van verlichtingsideeën werd door vorsten streng in de gaten gehouden en soms verboden."},
+
+{t:"Tijdvak 7 / HC Verlichting", ka:"KA28: verlicht absolutisme",
+ q:"Wat is verlicht absolutisme en hoe verhield het zich tot de ideeën van de Verlichting?",
+ a:"Vorsten zoals Frederik de Grote en Jozef II omarmden verlichtingsideeën (tolerantie, rechtshervorming, onderwijs) zonder het absolutisme los te laten. Verlichting als middel voor een effectiever bestuur, niet als weg naar democratie."},
+
+{t:"Tijdvak 7 / HC Verlichting", ka:"KA29: trans-Atlantische slavenhandel",
+ q:"Hoe hing de trans-Atlantische slavenhandel samen met de Europese plantagekoloniën, en wat was het abolitionisme?",
+ a:"Suiker-, tabaks- en katoenplantages in Amerika hadden goedkope arbeid nodig. Miljoenen Afrikanen werden tot slaaf gemaakt en verscheept (Middle Passage). Abolitionisme: beweging die slavernij wilde afschaffen, mede geïnspireerd door verlichtingsideeën over gelijkheid."},
+
+{t:"Tijdvak 7 / HC Verlichting", ka:"KA30: democratische revoluties",
+ q:"Hoe werden verlichtingsideeën in de Amerikaanse Onafhankelijkheidsverklaring (1776) in de praktijk gebracht?",
+ a:"Dertien Britse koloniën verklaarden zich onafhankelijk. De grondwet weerspiegelde verlichtingsideeën: volkssoevereiniteit, scheiding der machten, grondrechten. Maar: vrouwen, slaafgemaakten en inheemse bevolking kregen deze rechten niet."},
+
+{t:"Tijdvak 7 / HC Verlichting", ka:"KA30: democratische revoluties",
+ q:"Hoe verliep de Franse Revolutie en welke fasen zijn te onderscheiden?",
+ a:"1789: financiële crisis, bijeenroeping Staten-Generaal, Verklaring van de rechten van de mens, constitutionele monarchie. 1792: tweede revolutie, republiek, jakobijnen onder Robespierre voeren Terreur in. Na de Terreur: instabiliteit, tot Napoleon in 1799 de macht greep."},
+
+{t:"Tijdvak 7 / HC Verlichting", ka:"KA30: democratische revoluties",
+ q:"Wat was de rol van Napoleon bij het verspreiden van revolutionaire ideeën?",
+ a:"Napoleon veroverde groot deel van Europa en voerde de Code Napoléon in — wetboeken met revolutionaire ideeën: gelijkheid voor de wet, eigendomsrecht, afschaffing van privileges. Maar: hij kroonde zichzelf tot keizer en ondermijnde democratische principes."},
+
+// ============================================================
+// TIJDVAK 8 — Burgers en Stoommachines
+// ============================================================
+{t:"Tijdvak 8 / HC Verlichting", ka:"KA31: industriële revolutie",
+ q:"Wat zijn de kenmerken en gevolgen van de industriële revolutie in de westerse wereld?",
+ a:"Stoommachine, fabrieksproductie, versteding, groei van het proletariaat, kinderarbeid, spoorwegen. Leidde tot enorme welvaartsgroei maar ook grote sociale ongelijkheid en de 'sociale kwestie'. Aanvankelijk in Engeland, daarna continentaal Europa."},
+
+{t:"Tijdvak 8 / HC Verlichting", ka:"KA32: sociale kwestie",
+ q:"Wat hield de discussie over de 'sociale kwestie' in de 19e eeuw in?",
+ a:"De vraag hoe de ellendige leefomstandigheden van arbeiders (lange werkdagen, lage lonen, sloppenwijken) aangepakt moesten worden. Antwoorden varieerden: liberalen zagen het als persoonlijke verantwoordelijkheid, socialisten eisten staatsingrijpen, christenen ontwikkelden katholieke sociale leer."},
+
+{t:"Tijdvak 8 / HC China", ka:"KA33: modern imperialisme",
+ q:"Wat kenmerkt de moderne vorm van imperialisme die verband hield met de industrialisatie?",
+ a:"Industriële landen hadden grondstoffen, afzetmarkten en investeringsgebieden nodig. Europese mogendheden verdeelden Afrika (Conferentie van Berlijn 1884–85) en drongen China binnen via ongelijke verdragen. Legitimering via 'beschavingsmissie' en Sociaal Darwinisme."},
+
+{t:"Tijdvak 8 / HC Verlichting + China", ka:"KA34: emancipatiebewegingen",
+ q:"Welke emancipatiebewegingen ontstonden in de 19e eeuw en wat streefden zij na?",
+ a:"Arbeidersbeweging (vakbonden, socialistische partijen), vrouwenbeweging (kiesrecht, gelijke rechten — bijv. Aletta Jacobs in NL), abolitionisme (afschaffing slavernij), nationalisme als collectieve emancipatie van volkeren."},
+
+{t:"Tijdvak 8 / HC Verlichting", ka:"KA35: democratisering",
+ q:"Hoe verliep de voortschrijdende democratisering in Europa in de 19e eeuw?",
+ a:"Geleidelijke uitbreiding van het kiesrecht, aanvankelijk censuskiesrecht (alleen bezittenden), later algemeen mannenkiesrecht en uiteindelijk vrouwenkiesrecht. In Nederland: Thorbeckes grondwetsherziening 1848, Pacificatie 1917 (algemeen kiesrecht en onderwijsgelijkstelling)."},
+
+{t:"Tijdvak 8 / HC Verlichting", ka:"KA36: politieke stromingen",
+ q:"Wat zijn de kernideeën van het liberalisme, socialisme, nationalisme, confessionalisme en feminisme als 19e-eeuwse politieke stromingen?",
+ a:"Liberalisme: individuele vrijheid, beperkte staat. Socialisme: gelijkheid, collectief eigendom. Nationalisme: eenheid op basis van taal en cultuur (leidde tot eenwording Italië en Duitsland). Confessionalisme: christelijke waarden in politiek. Feminisme: gelijke rechten voor vrouwen."},
+
+// ============================================================
+// TIJDVAK 9 — Wereldoorlogen
+// ============================================================
+{t:"Tijdvak 9 / HC Duitsland", ka:"KA37: propaganda en massaorganisatie",
+ q:"Welke rol speelden propaganda en communicatiemiddelen in het nationaalsocialisme?",
+ a:"Goebbels stuurde alle media: radio, film (Riefenstahl), posters, massameetings (Neurenberg) verspreidden de nazi-ideologie. De NSDAP was een massaorganisatie met paramilitaire takken (SA, SS). Propaganda was essentieel voor het creëren van de Volksgemeinschaft."},
+
+{t:"Tijdvak 9 / HC China + Duitsland", ka:"KA38: totalitaire ideologieën",
+ q:"Wat zijn de kenmerken van het in praktijk brengen van de totalitaire ideologieën communisme en fascisme/nationaalsocialisme?",
+ a:"Beide: eénpartijstaat, terreur, propaganda, staatscultus. Verschil: communisme richt zich op klasse (proletariaat vs. bourgeoisie); nazisme op ras (Arisch ras, antisemitisme). Stalin: gulags en zuiveringen. Hitler: Holocaust en Volksgemeinschaft."},
+
+{t:"Tijdvak 9 / HC Duitsland", ka:"KA39: crisis wereldkapitalisme",
+ q:"Wat was de crisis van het wereldkapitalisme en welke gevolgen had die voor Duitsland?",
+ a:"De beurskrach van 1929 leidde tot massawerkloosheid, bankencrises en protectionisme wereldwijd. In Duitsland verdiepte de crisis de politieke instabiliteit van de Weimarrepubliek. De NSDAP profiteerde: Hitler beloofde herstel van welvaart en nationale eer."},
+
+{t:"Tijdvak 9 / HC Duitsland", ka:"KA40: twee wereldoorlogen",
+ q:"Wat waren de oorzaken van de Eerste Wereldoorlog?",
+ a:"Militarisme (wapenwedloop), alliantiestelsels (Triple Entente vs. Triple Alliantie), imperialisme (concurrentie om koloniën), nationalisme (met name op de Balkan). Aanleiding: moord op Franz Ferdinand in Sarajevo (1914)."},
+
+{t:"Tijdvak 9 / HC Duitsland", ka:"KA40: twee wereldoorlogen",
+ q:"Welke gevolgen had het Verdrag van Versailles (1919) voor Duitsland?",
+ a:"Duitsland accepteerde oorlogsschuld, verloor grondgebied (Elzas-Lotharingen, Poolse corridor), moest enorme herstelbetalingen betalen en mocht slechts een klein leger houden. De vernederende voorwaarden voedden de dolkstootlegende en het opkomend nationaalsocialisme."},
+
+{t:"Tijdvak 9 / HC Duitsland", ka:"KA40: twee wereldoorlogen",
+ q:"Hoe kon Hitler in 1933 aan de macht komen in Duitsland?",
+ a:"De Weimarrepubliek was verzwakt door herstelbetalingen, de beurskrach (1929) en politieke extremisten. De NSDAP werd via verkiezingen de grootste partij. Na Hitlers benoeming tot rijkskanselier maakte de Rijksdagbrand en de machtigingswet een einde aan de democratie."},
+
+{t:"Tijdvak 9 / HC Duitsland", ka:"KA41: genocide",
+ q:"Wat was de Holocaust en hoe werd die georganiseerd?",
+ a:"Systematische genocide door de nazi's op zes miljoen Joden en miljoenen anderen (Roma, gehandicapten, homo's, politieke tegenstanders). Fasen: uitsluiting (Neurenbergwetten 1935), getto's, Wannseeconferentie (1942) en vernietigingskampen (Auschwitz, Sobibor)."},
+
+{t:"Tijdvak 9 / HC Duitsland", ka:"KA42: Duitse bezetting Nederland",
+ q:"Wat zijn de belangrijkste kenmerken van de Duitse bezetting van Nederland (1940–1945)?",
+ a:"Duitsland viel Nederland binnen in mei 1940. De bezetter stelde de rechtsstaat buiten werking, voerde arbeidsdienst in en deporteerde de Nederlandse Joden (meer dan 100.000) naar vernietigingskampen. Zowel verzet als collaboratie kwamen voor."},
+
+{t:"Tijdvak 9", ka:"KA43: massavernietigingswapens",
+ q:"Welke nieuwe schaal van verwoesting kenmerkte de Tweede Wereldoorlog?",
+ a:"Atoombommen op Hiroshima en Nagasaki (1945), bombardementen op steden (Rotterdam, Dresden, Londen), totale oorlogsvoering waarbij de burgerbevolking direct doelwit was. Gevechten aan meerdere fronten tegelijk, miljoenen burgerslachtoffers."},
+
+{t:"Tijdvak 9 / HC China", ka:"KA44: verzet tegen imperialisme",
+ q:"Welke vormen van verzet tegen het West-Europese imperialisme zijn te onderscheiden, en welke rol speelden de wereldoorlogen daarin?",
+ a:"Opkomend nationaal bewustzijn in koloniën (India, Indonesië, China). Verzet via gewapende opstand (bijv. Bokseropstand China 1900), politieke bewegingen en nationalistische partijen. De wereldoorlogen verzwakten Europese mogendheden en versterkten het dekolonisatieproces."},
+
+// ============================================================
+// TIJDVAK 10 — Televisie en Computer
+// ============================================================
+{t:"Tijdvak 10 / HC Duitsland + China", ka:"KA45: Koude Oorlog",
+ q:"Wat was de Koude Oorlog en welke ideologische blokken stonden tegenover elkaar?",
+ a:"Geopolitiek en ideologisch conflict (1947–1991) tussen de VS (kapitalisme, liberale democratie, NAVO) en de Sovjet-Unie (communisme, planeconomie, Warschaupact). Nooit directe oorlog, maar wapenwedloop, proxy-oorlogen en dreiging van atoomoorlog."},
+
+{t:"Tijdvak 10 / HC Duitsland", ka:"KA45: Koude Oorlog",
+ q:"Hoe beïnvloedde de Koude Oorlog de deling en wederopbouw van Duitsland (1945–1961)?",
+ a:"Duitsland werd verdeeld in vier bezettingszones. In 1949 ontstonden de BRD (westers, democratisch, Marshallplan) en DDR (Sovjet-model, totalitaire dictatuur). Berlijnse Blokkade (1948) werd via luchtbrug omzeild. DDR-burgers vluchtten naar het Westen → Berlijnse Muur gebouwd in 1961."},
+
+{t:"Tijdvak 10 / HC Duitsland", ka:"KA45: Koude Oorlog",
+ q:"Wat verklaart de val van de Berlijnse Muur (1989) en de hereniging van Duitsland (1990)?",
+ a:"Gorbatsjovs glasnost en perestrojka. DDR-leiding weigerde te hervormen, massaprotesten groeiden. Oost-Europese landen openden grenzen. Op 9 november 1989 viel de muur. In 1990 hereniging; Kohl accepteerde de euro in ruil voor Franse steun. In 1991 uiteenvallen Sovjet-Unie."},
+
+{t:"Tijdvak 10", ka:"KA46: dekolonisatie",
+ q:"Wat waren de oorzaken van de dekolonisatie na 1945?",
+ a:"Verzwakking van Europese mogendheden door WOII, nationalistisch bewustzijn in koloniën, druk van VS en VN (zelfbeschikkingsrecht), toenemende kosten van koloniale controle. Voorbeelden: Indonesische onafhankelijkheid (1945/1949), India (1947), Afrikaanse landen (jaren '60)."},
+
+{t:"Tijdvak 10 / HC Duitsland", ka:"KA47: eenwording Europa",
+ q:"Wat zijn de fundamenten en drijfveren van de Europese integratie na 1945?",
+ a:"EGKS (1951, Schuman/Adenauer): kolen en staal als basis voor vrede. EEG (1957, Verdrag van Rome): gemeenschappelijke markt. Drijfveer: nooit meer oorlog tussen Europese staten. Groei naar EU (Maastricht 1992), euro, uitbreiding met voormalig Oostblok."},
+
+{t:"Tijdvak 10 / HC Duitsland + China", ka:"KA48: westerse welvaart en sociaal-culturele verandering",
+ q:"Welke ingrijpende sociaal-culturele veranderingsprocessen vonden plaats in het Westen vanaf de jaren '60?",
+ a:"Welvaartsgroei → individualisering, seksuele revolutie, ontzuiling, vrouwenemancipatie, studentenprotesten (1968), antioorlogsbeweging. In BRD ook links terrorisme (Baader-Meinhof Gruppe) als reactie op beperkte denazificatie en consumptiecultuur."},
+
+{t:"Tijdvak 10", ka:"KA49: pluriforme en multiculturele samenlevingen",
+ q:"Wat wordt bedoeld met de ontwikkeling van pluriforme en multiculturele samenlevingen?",
+ a:"Door immigratie (gastarbeiders, postkoloniale migratie), globalisering en secularisering ontstonden samenlevingen met meerdere culturen, religies en levensstijlen naast elkaar. Dit leidde tot debatten over integratie, identiteit en de grenzen van tolerantie."},
+
+// ============================================================
+// HISTORISCHE CONTEXT: STEDEN EN BURGERS (extra verdiepingsvragen)
+// ============================================================
+{t:"HC Steden & Burgers 1050–1700", ka:"Brugge en Atrecht",
+ q:"Welke rol speelde Atrecht in de vroege stedelijke ontwikkeling van de Lage Landen?",
+ a:"Atrecht was het startpunt van stedelijke dynamiek: hoge landbouwproductiviteit en schapenhouderij maakten de stad een centrum van lakennijverheid. Handelaren vonden aansluiting op jaarmarkten in Frankrijk en verder tot Italiaanse stadstaten. Rijke kooplieden in koopliedengilde namen het stadsbestuur over."},
+
+{t:"HC Steden & Burgers 1050–1700", ka:"Brugge als handelscentrum",
+ q:"Welke innovaties maakten Brugge tot het handelscentrum van Noordwest-Europa rond 1300?",
+ a:"Brugge combineerde de wisselbrief met het bankwezen tot de eerste koopmansbeurs. Het had via de Noordzee verbindingen met de Hanze én Spanje en Italië. Patriciërs namen een adellijke levensstijl aan, wat leidde tot sociale spanningen met ambachtslieden."},
+
+{t:"HC Steden & Burgers 1050–1700", ka:"Antwerpen",
+ q:"Waarom nam Antwerpen de rol van Brugge over als handelscentrum in de 15e–16e eeuw?",
+ a:"Antwerpen had een goede verbinding met het Europese achterland en was toegankelijk voor de nieuwe grotere zeeschepen. Het profiteerde van de Bourgondische centraliseringspolitiek en nam een centrale rol in de handel met Spaanse en Portugese koloniën in."},
+
+{t:"HC Steden & Burgers 1050–1700", ka:"Republiek na 1602",
+ q:"Waarom leidde het Rampjaar 1672 tot het einde van de Gouden Eeuw van de Republiek?",
+ a:"Engeland en het absolutistische Frankrijk voerden mercantilistisch beleid. Na 1672 namen investeringen in het buitenland toe en oligarchiseerde de regentenklasse. Toenemende concurrentie in de wereldhandel; Londen nam de rol van Amsterdam als financieel centrum over."},
+
+// ============================================================
+// HISTORISCHE CONTEXT: VERLICHTING (extra verdiepingsvragen)
+// ============================================================
+{t:"HC Verlichting 1650–1900", ka:"Sociaal contract",
+ q:"Wat verstonden Locke en Rousseau onder het 'sociaal contract' en hoe verschilden zij daarin?",
+ a:"Locke: het volk draagt macht over aan de overheid; als die de natuurrechten (leven, vrijheid, eigendom) schendt, mag het volk in opstand komen. Rousseau: alle macht gaat uit van de algemene wil (volonté générale); directe democratie, gelijkheid ook van armen en slaven."},
+
+{t:"HC Verlichting 1650–1900", ka:"Montesquieu",
+ q:"Wat is de trias politica van Montesquieu en waarom was het zo invloedrijk?",
+ a:"Montesquieu pleitte voor scheiding van wetgevende, uitvoerende en rechterlijke macht om tirannie te voorkomen. Dit idee werd opgenomen in de Amerikaanse grondwet (1787) en de Franse grondwet van 1791 en vormt de basis van moderne democratieën."},
+
+{t:"HC Verlichting 1650–1900", ka:"Franse Revolutie fases",
+ q:"Wie was Olympe de Gouges en waarom is ze historisch significant?",
+ a:"Olympe de Gouges schreef de eerste Verklaring van de rechten van de vrouw (1791) als reactie op de Verklaring die vrouwen uitsloot. Ze werd door de jakobijnen geguillotineerd. Haar werk geldt als vroeg voorbeeld van het feminisme."},
+
+{t:"HC Verlichting 1650–1900", ka:"Congres van Wenen",
+ q:"Wat probeerden de Europese mogendheden te bereiken op het Congres van Wenen (1814–1815)?",
+ a:"Herstel van de pre-napoleontische orde (restauratie): monarchieën terug aan de macht, grenzen hersteld, machtsevenwicht tussen grote mogendheden (Concert of Europe). Toch bleven veel napoleontische hervormingen (Code Napoléon, gelijkheid voor de wet) van kracht."},
+
+{t:"HC Verlichting 1650–1900", ka:"Grondwet Nederland 1848",
+ q:"Wat regelde de Nederlandse grondwetsherziening van Thorbecke in 1848?",
+ a:"Nederland werd een constitutionele monarchie met ministeriële verantwoordelijkheid (ministers verantwoording aan parlement), directe verkiezingen voor de Tweede Kamer en vrijheden van onderwijs, vergadering en pers. Sloot aan bij liberale beginselen van de Verlichting."},
+
+// ============================================================
+// HISTORISCHE CONTEXT: CHINA 1842–2001
+// ============================================================
+{t:"HC China 1842–2001", ka:"Imperialisme in China",
+ q:"Wat waren de 'ongelijke verdragen' en welke gevolgen hadden zij voor China?",
+ a:"Na de Opiumoorlogen dwongen westerse mogendheden China ongelijke verdragen af: extra-territorialiteit in steden als Shanghai en Hongkong, lage importtarieven, verlies van soevereiniteit. China misliep inkomsten en verloor gezag over economische centra."},
+
+{t:"HC China 1842–2001", ka:"Verzwakking Qing",
+ q:"Welke interne en externe factoren leidden tot de verzwakking van de Qing-dynastie en de revolutie van 1911?",
+ a:"Intern: corruptie, hongersnoden, politieke crises, mislukte hervormingen (Zelfversterkingsbeweging). Extern: verlies van grondgebied aan Japan (1895), Rusland en Frankrijk, vernederende Bokserprotocol (1901). In 1911 brak een revolutie uit die een einde maakte aan het keizerrijk."},
+
+{t:"HC China 1842–2001", ka:"4 Meibeweging en CCP",
+ q:"Wat was de 4 Meibeweging en hoe leidde zij tot de oprichting van de Chinese Communistische Partij?",
+ a:"Na WWI protesteerden Chinese studenten (1919) tegen de toekenning van Duitse gebieden in China aan Japan (Verdrag van Versailles). De beweging zette zich in voor modernisering van bestuur, samenleving en cultuur. Onder invloed van marxisme en de Russische Revolutie richtten leden de CCP op."},
+
+{t:"HC China 1842–2001", ka:"Nationalisten vs. communisten",
+ q:"Hoe verliep de machtsstrijd tussen de nationalisten (Kuomintang) en de communisten in China tussen 1927 en 1949?",
+ a:"Na samenwerking bloedige breuk in 1927: Chiang Kaishek vermoordde duizenden communisten. Lange Mars (1934–35). WWII: noodgedwongen samenwerking tegen Japan. Na Japanse capitulatie burgeroorlog. Communisten wonnen steun van boeren; nationalisten faalden economisch. In 1949 riep Mao de Volksrepubliek uit."},
+
+{t:"HC China 1842–2001", ka:"Volksrepubliek China",
+ q:"Wat was de Grote Sprong Voorwaarts en welke gevolgen had het?",
+ a:"Mao's poging (1958–1962) China snel te industrialiseren via collectivisering van landbouw en lokale staalindustrie. Het project mislukte volkomen: de hongersnood kostte tientallen miljoenen mensen het leven. In 1962 koos de partij voor een pragmatischer economisch beleid."},
+
+{t:"HC China 1842–2001", ka:"Culturele Revolutie",
+ q:"Wat was de Culturele Revolutie (1966–1976) en wat waren de gevolgen?",
+ a:"Maos poging de samenleving ingrijpend te hervormen: partijzuiveringen, cultus rond Mao, Rode Gardisten die intellectuelen, traditie en 'bourgeois' cultuur aanvielen. Anti-intellectueel, antitraditioneel en xenofoob. Ontwrichtte de gehele samenleving; na Maos dood (1976) officieel afgewezen."},
+
+{t:"HC China 1842–2001", ka:"Vier Moderniseringen",
+ q:"Wat waren de Vier Moderniseringen van Deng Xiaoping en wat was het politieke gevolg?",
+ a:"Modernisering van landbouw, industrie, wetenschap & technologie en defensie. Leidde tot spectaculaire economische groei en opening naar het Westen. Maar politieke liberalisering werd geblokkeerd: studentendemonstraties op het Plein van de Hemelse Vrede (Tiananmen, 1989) werden bloedig neergeslagen."},
+
+{t:"HC China 1842–2001", ka:"China en de Koude Oorlog",
+ q:"Hoe raakte China betrokken bij de Koude Oorlog en hoe veranderde die positie?",
+ a:"1949: Volksrepubliek steunde door USSR, Taiwan (nationalisten) door VS. Na Sino-Sovjet breuk (1960s) internationaal isolement. Toenadering tot VS in vroege jaren '70 (Nixon–Mao). In 1971 nam de Volksrepubliek de VN-zetel van Taiwan over. In 2001 toetreding tot de WTO."},
+
+// ============================================================
+// HISTORISCHE CONTEXT: DUITSLAND IN EUROPA 1918–1991
+// ============================================================
+{t:"HC Duitsland 1918–1991", ka:"Weimarrepubliek",
+ q:"Waarom was de Weimarrepubliek (1919–1933) zo kwetsbaar?",
+ a:"De democratie was geassocieerd met de oorlogsnederlaag en het 'schandelijke' Verdrag van Versailles (dolkstootlegende). Conservatieve elite en het leger stonden er vijandig tegenover. Economische instabiliteit (hyperinflatie 1923, crisis 1929) en extremistische partijen van links en rechts ondermijnden haar."},
+
+{t:"HC Duitsland 1918–1991", ka:"Nazi-terreur",
+ q:"Hoe bouwden de nazi's na 1933 een totalitair regime op?",
+ a:"Met de machtigingswet (1933) schakelden ze het parlement uit. Terreur via SS en Gestapo. Propaganda nazificeerde de samenleving. Politieke tegenstanders en 'rassenvijanden' werden vervolgd. De Neurenbergwetten (1935) ontnamen Joden hun burgerrechten."},
+
+{t:"HC Duitsland 1918–1991", ka:"Appeasement en WOII",
+ q:"Wat was de appeasementpolitiek en waarom faalde zij?",
+ a:"Groot-Brittannië en Frankrijk probeerden oorlog te voorkomen door tegemoet te komen aan Hitlers territoriale eisen (Conferentie van München 1938: afstaan van Sudetenland). Faalde omdat Hitler verdere eisen stelde; na de inval in Polen (1939) verklaarden zij Duitsland de oorlog."},
+
+{t:"HC Duitsland 1918–1991", ka:"BRD vs DDR",
+ q:"Wat zijn de belangrijkste verschillen tussen de BRD en de DDR in de jaren 1949–1961?",
+ a:"BRD: parlementaire democratie, Marshallplan, Wirtschaftswunder, lid NAVO en EGKS, Adenauers Westintegration. DDR: volksrepubliek naar Sovjet-model, totalitaire dictatuur onder Ulbricht, Stasi-controle, Warschaupact, slechte economie → massale vlucht naar het Westen."},
+
+{t:"HC Duitsland 1918–1991", ka:"Ostpolitik",
+ q:"Wat was de Ostpolitik van Willy Brandt en welk doel diende zij?",
+ a:"Vanaf 1969 normaliseerde Brandt de betrekkingen met de DDR en Oost-Europa. In 1972 erkenden BRD en DDR elkaar. Doel: détente en uiteindelijk hereniging via toenadering. Brandt investeerde tegelijk sterk in Europese integratie als garantie voor de westerse verhoudingen."},
+
+{t:"HC Duitsland 1918–1991", ka:"Hereniging en Europa",
+ q:"Hoe werd de hereniging van Duitsland (1990) mogelijk en wat waren de Europese gevolgen?",
+ a:"Gorbatsjovs hervormingen (glasnost/perestrojka) leidden tot de val van de muur (1989). Kohl en Gorbatsjov sloten een akkoord. In ruil voor Franse steun (Mitterrand) voor de hereniging accepteerde Kohl de invoering van de euro. Duitsland nam een leidende rol in de EU op zich."},
+
+// ============================================================
+// DOMEIN A — Historisch denken en redeneren
+// ============================================================
+{t:"Domein A: historisch denken", ka:"Causaliteit",
+ q:"Wat is het verschil tussen een oorzaak en een aanleiding in historische analyse?",
+ a:"Een oorzaak is een structurele, diepere factor die een historische ontwikkeling mogelijk maakt (bijv. sociale ongelijkheid). Een aanleiding is de meest directe aanleiding — de concrete trigger die het proces op gang brengt (bijv. de moord op Franz Ferdinand als aanleiding voor WWI)."},
+
+{t:"Domein A: historisch denken", ka:"Standplaatsgebondenheid",
+ q:"Wat wordt bedoeld met standplaatsgebondenheid van historische actoren?",
+ a:"Menselijk gedrag in het verleden moet worden verklaard vanuit de kennis, waarden en omstandigheden van die tijd en plaats. Factoren: waardesystemen, politieke en culturele oriëntatie, gender, sociale positie. Anachronisme (huidige normen op verleden toepassen) moet worden vermeden."},
+
+{t:"Domein A: historisch denken", ka:"Continuïteit en verandering",
+ q:"Wat wordt bedoeld met 'de gelijktijdigheid van het ongelijktijdige'?",
+ a:"Elementen uit verschillende tijdvakken kunnen tegelijk bestaan in één periode. Bijv. in de 17e-eeuwse Republiek bestond naast ultramodern handelskapitalisme nog het feodale systeem op het platteland. Continuïteiten van langere en kortere duur kunnen naast elkaar bestaan."},
+
+{t:"Domein A: historisch denken", ka:"Bronkritiek",
+ q:"Waarmee moet je rekening houden bij het beoordelen van de bruikbaarheid van een historische bron?",
+ a:"Betrouwbaarheid: wie maakte de bron, met welk doel, voor welk publiek, in welke context? Representativiteit: geldt de informatie voor meer mensen/situaties? Standplaatsgebondenheid van de maker. En: onderscheid tussen feiten, meningen en vooroordelen."},
+
+{t:"Domein A: historisch denken", ka:"Periodisering",
+ q:"Waarom is elke indeling in perioden en tijdvakken een interpretatie?",
+ a:"Periodisering is een menselijke constructie die afhankelijk is van de vraagstelling en het perspectief. De westerse tijdvakkenindeling is geen objectieve waarheid maar een westers perspectief dat andere culturen en chronologieën kan marginaliseren."},
+
+// Extra losse vragen om op 100+ te komen
+{t:"Tijdvak 6", ka:"KA25: VOC",
+ q:"Wat maakte de VOC (1602) historisch uniek?",
+ a:"De VOC was de eerste naamloze vennootschap ter wereld: aandelenkapitaal van particulieren spreidde het risico. Ze had quasi-staatsmacht (eigen leger, munt, verdragen sluiten) en een handelsmonopolie op Aziatische handel. Vestigde handelsposten van Kaap de Goede Hoop tot Japan."},
+
+{t:"Tijdvak 8", ka:"KA29: slavenhandel",
+ q:"Wat was de rol van de WIC in de trans-Atlantische slavenhandel?",
+ a:"De West-Indische Compagnie (1621) had een periode het monopolie op de slavenhandel. Nederland was een van de grootste slavenhandelaren in de 17e–18e eeuw, verscheepte honderdduizenden Afrikanen naar Suriname en de Antillen voor suiker- en koffieplantages."},
+
+{t:"Tijdvak 10", ka:"KA46: dekolonisatie Nederland",
+ q:"Hoe verliep de Indonesische onafhankelijkheidsstrijd en hoe reageerde Nederland?",
+ a:"Na Japanse capitulatie riep Soekarno in 1945 de onafhankelijkheid uit. Nederland voerde twee 'politionele acties' (1947, 1948). Onder internationale druk (VS, VN) erkende Nederland in 1949 de soevereiniteit van Indonesië. In 2022 erkende de Nederlandse overheid de onrechtmatigheid van het geweld."},
+
+{t:"HC China 1842–2001", ka:"KA38: CCP propaganda",
+ q:"Hoe gebruikte de Chinese Communistische Partij propaganda en massaorganisatie om haar macht te vestigen en te bewaren?",
+ a:"Via de media, onderwijs en massameetingen verspreidde de CCP het marxistisch-leninistische en later maoïstische gedachtegoed. De cultus rond Mao (Rode Boekje) mobiliseerde de bevolking. De Rode Gardisten tijdens de Culturele Revolutie waren een voorbeeld van massaorganisatie als politiek instrument."},
+
+{t:"Tijdvak 7", ka:"KA30: Bataafse Republiek",
+ q:"Wat was de Bataafse Republiek en hoe hing zij samen met de Franse Revolutie?",
+ a:"In 1795 hielpen Franse troepen de Patriotten om de stadhouder Willem V te verdrijven. De Bataafse Republiek (1795–1806) werd gevestigd met een democratischere grondwet. Zij was de eerste stap in de Nederlandse staatsontwikkeling en voerde de Code Napoléon in."},
+
+{t:"Tijdvak 9", ka:"KA37–KA38: Sovjet-Unie",
+ q:"Hoe paste Stalin de totalitaire ideologie van het communisme toe in de Sovjet-Unie?",
+ a:"Eénpartijstaat, staatscultus rond Stalin, vijfjarenplannen voor industrialisatie, collectivisering van landbouw. Terreur: de Grote Zuivering (1936–38) elimineerde politieke tegenstanders en legerofficieren via showtribunalen. Gulags voor miljoenen. Propaganda via media en onderwijs."},
+
+{t:"Tijdvak 10 / HC Duitsland", ka:"KA47: NAVO en EGKS",
+ q:"Welke internationale organisaties markeerden de westerse integratie van de BRD in de jaren 1950?",
+ a:"BRD werd in 1955 lid van de NAVO (militaire integratie in het Westen) en was al in 1952 lid van de EGKS (Europese Gemeenschap voor Kolen en Staal). Adenauer zag Westintegration als noodzakelijk voor het herstel van Duits aanzien en als dam tegen communisme."},
+
+{t:"HC Verlichting 1650–1900", ka:"KA31: industrialisatie en socialisme",
+ q:"Hoe reageerde het socialisme op de industriële revolutie en de sociale kwestie?",
+ a:"Socialisten (Marx, Engels) zagen de industrialisatie als bewijs van klassenstrijd: de bourgeoisie exploiteerde het proletariaat. Vakbonden, coöperaties en socialistische partijen ontstonden. Marxisten streefden naar revolutie; sociaaldemocraten naar geleidelijke hervorming via verkiezingen."},
+
+{t:"HC Duitsland 1918–1991", ka:"KA45: Blokkade van Berlijn",
+ q:"Wat was de Berlijnse Blokkade (1948) en wat toonde zij over de Koude Oorlog?",
+ a:"Stalin blokkeerde alle landwegen naar West-Berlijn om de Westerse mogendheden te dwingen de stad op te geven. De VS reageerden met een massieven luchtbrug (bijna een jaar). De blokkade toonde de bereidheid van beide kanten om te confronteren zonder direct oorlog te voeren."},
+
+{t:"HC China 1842–2001", ka:"KA46: dekolonisatie en China",
+ q:"Hoe maakte de dekolonisatie een einde aan de westerse hegemonie en welke rol speelde China daarin?",
+ a:"Na WOII maakten Aziatische en Afrikaanse landen zich los van het Westen. China probeerde via niet-gebonden landen in Azië, Afrika en Latijns-Amerika invloed te verwerven als alternatief voor zowel de VS als de USSR. De Volksrepubliek presenteerde zich als bondgenoot van dekoloniserende landen."},
+
+{t:"Tijdvak 8", ka:"KA36: verzuiling Nederland",
+ q:"Wat was de verzuiling in Nederland en hoe hing het samen met de politieke stromingen van de 19e eeuw?",
+ a:"De samenleving organiseerde zich langs religieuze en ideologische zuilen (protestants, katholiek, socialistisch, liberaal) met eigen scholen, kranten, vakbonden en partijen. De Pacificatie van 1917 loste de Schoolstrijd op via gelijkstelling van openbaar en bijzonder onderwijs én invoering van algemeen kiesrecht."}
+
 ];
 
 let deck = [];
@@ -411,6 +728,7 @@ let current = null;
 let flipped = false;
 let statsTotal = 0, statsGood = 0, statsWrong = 0;
 let rolling = [];
+const TOTAL = ALL_CARDS.length;
 
 function shuffle(arr) {
   let a = arr.slice();
@@ -433,20 +751,19 @@ function init() {
 }
 
 function next() {
-  if (deck.length === 0) {
-    showFinished();
-    return;
-  }
+  if (deck.length === 0) { showFinished(); return; }
   current = deck.shift();
   flipped = false;
   document.getElementById('tijdvak-badge').textContent = current.t;
+  document.getElementById('tijdvak-badge').title = current.t;
+  document.getElementById('ka-tag').textContent = current.ka;
   document.getElementById('card-label').textContent = 'Vraag';
   document.getElementById('card-text').textContent = current.q;
   document.getElementById('card-hint').textContent = 'Tik om antwoord te zien';
   document.getElementById('card').classList.remove('flip');
   document.getElementById('btn-flip-row').classList.remove('hidden');
   document.getElementById('btn-answer-row').classList.add('hidden');
-  document.getElementById('question-counter').textContent = (ALL_CARDS.length - deck.length) + ' / ' + ALL_CARDS.length;
+  document.getElementById('question-counter').textContent = statsGood + '/' + TOTAL;
   updateProgressBar();
 }
 
@@ -469,7 +786,9 @@ function answer(correct) {
   } else {
     statsWrong++;
     rolling.push('w');
-    deck.push(current);
+    // terugleggen op willekeurige positie in het resterende deck
+    let pos = Math.floor(Math.random() * (deck.length + 1));
+    deck.splice(pos, 0, current);
   }
   if (rolling.length > 20) rolling.shift();
   updateStats();
@@ -482,8 +801,7 @@ function updateStats() {
   document.getElementById('s-good').textContent = statsGood;
   document.getElementById('s-wrong').textContent = statsWrong;
   if (rolling.length > 0) {
-    let gCount = rolling.filter(x => x === 'g').length;
-    let pct = Math.round((gCount / rolling.length) * 100);
+    let pct = Math.round(rolling.filter(x => x === 'g').length / rolling.length * 100);
     document.getElementById('s-ratio').textContent = pct + '%';
   } else {
     document.getElementById('s-ratio').textContent = '—';
@@ -495,17 +813,11 @@ function renderRolling() {
   container.innerHTML = '';
   for (let i = 0; i < 20; i++) {
     let dot = document.createElement('div');
-    dot.className = 'dot';
-    if (i < rolling.length) {
-      dot.classList.add(rolling[i]);
-    } else {
-      dot.classList.add('empty');
-    }
+    dot.className = 'dot' + (i < rolling.length ? ' ' + rolling[i] : '');
     container.appendChild(dot);
   }
   if (rolling.length > 0) {
-    let gCount = rolling.filter(x => x === 'g').length;
-    let pct = Math.round((gCount / rolling.length) * 100);
+    let pct = Math.round(rolling.filter(x => x === 'g').length / rolling.length * 100);
     document.getElementById('rolling-pct').textContent = pct + '%';
   } else {
     document.getElementById('rolling-pct').textContent = '—';
@@ -513,9 +825,7 @@ function renderRolling() {
 }
 
 function updateProgressBar() {
-  let done = statsGood;
-  let pct = Math.round((done / ALL_CARDS.length) * 100);
-  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-bar').style.width = Math.round(statsGood / TOTAL * 100) + '%';
 }
 
 function showFinished() {
@@ -525,9 +835,7 @@ function showFinished() {
   document.getElementById('f-wrong').textContent = statsWrong;
 }
 
-function restart() {
-  init();
-}
+function restart() { init(); }
 
 function confirmReset() {
   if (statsTotal === 0 || confirm('Weet je zeker dat je opnieuw wilt beginnen? Je voortgang gaat verloren.')) {
